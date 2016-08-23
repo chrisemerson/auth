@@ -10,33 +10,33 @@ class SaltedPasswordHashingStrategyDecorator implements PasswordHashingStrategy
     /** @var string */
     private $salt;
 
-    public function __construct(PasswordHashingStrategy $passwordHashingStrategy)
+    final public function __construct(PasswordHashingStrategy $passwordHashingStrategy)
     {
         $this->passwordHashingStrategy = $passwordHashingStrategy;
     }
 
-    public function setSalt(string $salt)
+    final public function setSalt(string $salt)
     {
         $this->salt = $salt;
     }
 
-    public function hashPassword(string $password): string
+    final public function hashPassword(string $password): string
     {
         return $this->passwordHashingStrategy->hashPassword(
-            $this->getSaltedPassword($password)
+            $this->getSaltedPassword($password, $this->salt)
         );
     }
 
-    public function verifyPassword(string $passwordToVerify, string $passwordHash): bool
+    final public function verifyPassword(string $passwordToVerify, string $passwordHash): bool
     {
         return $this->passwordHashingStrategy->verifyPassword(
-            $this->getSaltedPassword($passwordToVerify),
+            $this->getSaltedPassword($passwordToVerify, $this->salt),
             $passwordHash
         );
     }
 
-    private function getSaltedPassword(string $password): string
+    protected function getSaltedPassword(string $password, string $salt): string
     {
-        return $password . $this->salt;
+        return $password . $salt;
     }
 }

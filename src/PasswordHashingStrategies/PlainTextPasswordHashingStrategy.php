@@ -4,7 +4,7 @@ namespace CEmerson\AceAuth\PasswordHashingStrategies;
 
 use CEmerson\AceAuth\Exceptions\PlainTextPasswordStorageNotSupported;
 
-class PlainTextPasswordHashingStrategy implements PasswordHashingStrategy
+final class PlainTextPasswordHashingStrategy implements PasswordHashingStrategy
 {
     public function hashPassword(string $password): string
     {

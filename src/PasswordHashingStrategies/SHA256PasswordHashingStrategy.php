@@ -2,7 +2,7 @@
 
 namespace CEmerson\AceAuth\PasswordHashingStrategies;
 
-class SHA256PasswordHashingStrategy implements PasswordHashingStrategy
+final class SHA256PasswordHashingStrategy implements PasswordHashingStrategy
 {
     public function hashPassword(string $password): string
     {

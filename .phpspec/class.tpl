@@ -2,6 +2,6 @@
 
 namespace %namespace%;
 
-class %name%
+final class %name%
 {
 }

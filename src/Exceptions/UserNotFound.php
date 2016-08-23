@@ -2,6 +2,6 @@
 
 namespace CEmerson\AceAuth\Exceptions;
 
-class UserNotFound extends AceAuthException
+final class UserNotFound extends AceAuthException
 {
 }

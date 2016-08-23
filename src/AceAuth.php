@@ -5,7 +5,7 @@ namespace CEmerson\AceAuth;
 use CEmerson\AceAuth\Exceptions\UserNotFound;
 use CEmerson\AceAuth\Users\UserGateway;
 
-class AceAuth
+final class AceAuth
 {
     /** @var UserGateway */
     private $userGateway;

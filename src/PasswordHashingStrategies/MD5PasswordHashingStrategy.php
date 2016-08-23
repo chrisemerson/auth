@@ -2,7 +2,7 @@
 
 namespace CEmerson\AceAuth\PasswordHashingStrategies;
 
-class MD5PasswordHashingStrategy implements PasswordHashingStrategy
+final class MD5PasswordHashingStrategy implements PasswordHashingStrategy
 {
     public function hashPassword(string $password): string
     {
