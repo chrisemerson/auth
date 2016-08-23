@@ -11,9 +11,13 @@ final class AceAuth
     /** @var UserGateway */
     private $userGateway;
 
+    /** @var Session */
+    private $session;
+
     public function __construct(UserGateway $userGateway, Session $session)
     {
         $this->userGateway = $userGateway;
+        $this->session = $session;
     }
 
     public function login(string $username, string $password, bool $remember = false): bool
