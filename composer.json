@@ -20,6 +20,11 @@
             "CEmerson\\AceAuth\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "spec\\CEmerson\\AceAuth\\": "spec"
+        }
+    },
     "config": {
         "bin-dir": "bin"
     }

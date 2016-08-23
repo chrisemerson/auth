@@ -4,6 +4,6 @@ namespace CEmerson\AceAuth\Exceptions;
 
 use Exception;
 
-class AuthException extends Exception
+class AceAuthException extends Exception
 {
 }
