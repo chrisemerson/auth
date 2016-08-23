@@ -30,7 +30,8 @@ class SaltedPasswordHashingStrategyDecorator implements PasswordHashingStrategy
     public function verifyPassword(string $passwordToVerify, string $passwordHash): bool
     {
         return $this->passwordHashingStrategy->verifyPassword(
-            $this->getSaltedPassword($passwordToVerify), $passwordHash
+            $this->getSaltedPassword($passwordToVerify),
+            $passwordHash
         );
     }
 
