@@ -4,7 +4,7 @@ namespace spec\CEmerson\AceAuth\PasswordHashingStrategies;
 
 use PhpSpec\ObjectBehavior;
 
-class PHPPasswordHashingAPISpec extends ObjectBehavior
+class PHPPasswordHashingAPIStrategySpec extends ObjectBehavior
 {
     use PasswordHashingStrategyTestTrait;
 }

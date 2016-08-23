@@ -2,7 +2,7 @@
 
 namespace CEmerson\AceAuth\PasswordHashingStrategies;
 
-final class PHPPasswordHashingAPI implements PasswordHashingStrategy
+final class PHPPasswordHashingAPIStrategy implements PasswordHashingStrategy
 {
     /** @var int */
     private $algorithm = PASSWORD_DEFAULT;

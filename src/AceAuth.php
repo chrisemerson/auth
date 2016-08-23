@@ -19,7 +19,11 @@ final class AceAuth
     {
         try {
             $user = $this->userGateway->findUserByUsername($username);
-            return $user->verifyPassword($password);
+
+            if ($user->verifyPassword($password)) {
+
+                return true;
+            }
         } catch (UserNotFound $e) {
         }
 
