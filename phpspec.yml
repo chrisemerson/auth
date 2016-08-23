@@ -1,0 +1,4 @@
+suites:
+    default:
+        namespace: CEmerson\AceAuth\
+        psr4_prefix: CEmerson\AceAuth\

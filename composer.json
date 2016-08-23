@@ -1,0 +1,26 @@
+{
+    "name": "cemerson/aceauth",
+    "description": "A framework & data storage independent authentication library for PHP",
+    "authors": [
+        {
+            "name": "Chris Emerson",
+            "email": "chris@cemerson.co.uk"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "roave/security-advisories": "dev-master@dev"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "^3.0",
+        "squizlabs/php_codesniffer": "^2.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "CEmerson\\AceAuth\\": "src"
+        }
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}
