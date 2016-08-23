@@ -4,6 +4,8 @@ namespace CEmerson\AceAuth\Session;
 
 interface SessionGateway
 {
+    public function start();
+
     public function read(string $name);
 
     public function write(string $name, $data);

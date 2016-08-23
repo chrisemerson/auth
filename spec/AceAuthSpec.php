@@ -3,6 +3,7 @@
 namespace spec\CEmerson\AceAuth;
 
 use CEmerson\AceAuth\Exceptions\UserNotFound;
+use CEmerson\AceAuth\Session\Session;
 use CEmerson\AceAuth\Users\User;
 use CEmerson\AceAuth\Users\UserGateway;
 use PhpSpec\ObjectBehavior;
@@ -10,14 +11,17 @@ use Prophecy\Argument;
 
 class AceAuthSpec extends ObjectBehavior
 {
+    function let(UserGateway $userGateway, Session $session)
+    {
+        $this->beConstructedWith($userGateway, $session);
+    }
+
     function it_checks_the_user_gateways_to_find_user(
         UserGateway $userGateway,
         User $user
     ) {
         $user->verifyPassword(Argument::type('string'))->willReturn(true);
         $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
-
-        $this->beConstructedWith($userGateway);
 
         $this->login('username', 'password');
     }
@@ -26,8 +30,6 @@ class AceAuthSpec extends ObjectBehavior
         UserGateway $userGateway
     ) {
         $userGateway->findUserByUsername("username")->willThrow(new UserNotFound());
-
-        $this->beConstructedWith($userGateway);
 
         $this->login("username", "password")->shouldReturn(false);
     }
@@ -39,8 +41,6 @@ class AceAuthSpec extends ObjectBehavior
         $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(false);
         $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
 
-        $this->beConstructedWith($userGateway);
-
         $this->login('username', 'testPassword')->shouldReturn(false);
     }
 
@@ -50,8 +50,6 @@ class AceAuthSpec extends ObjectBehavior
     ) {
         $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(true);
         $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
-
-        $this->beConstructedWith($userGateway);
 
         $this->login('username', 'testPassword')->shouldReturn(true);
     }

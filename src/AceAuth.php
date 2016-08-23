@@ -3,6 +3,7 @@
 namespace CEmerson\AceAuth;
 
 use CEmerson\AceAuth\Exceptions\UserNotFound;
+use CEmerson\AceAuth\Session\Session;
 use CEmerson\AceAuth\Users\UserGateway;
 
 final class AceAuth
@@ -10,7 +11,7 @@ final class AceAuth
     /** @var UserGateway */
     private $userGateway;
 
-    public function __construct(UserGateway $userGateway)
+    public function __construct(UserGateway $userGateway, Session $session)
     {
         $this->userGateway = $userGateway;
     }
