@@ -9,7 +9,8 @@
     ],
     "require": {
         "php": "^7.0",
-        "roave/security-advisories": "dev-master@dev"
+        "roave/security-advisories": "dev-master@dev",
+        "paragonie/password_lock": "^3.0"
     },
     "require-dev": {
         "phpspec/phpspec": "^3.0",
