@@ -13,4 +13,6 @@ interface SessionGateway
     public function exists(string $name): bool;
 
     public function regenerate();
+
+    public function destroy();
 }

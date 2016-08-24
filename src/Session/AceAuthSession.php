@@ -47,6 +47,8 @@ final class AceAuthSession implements Session
     public function destroySession()
     {
         $this->checkSessionStarted();
+
+        $this->sessionGateway->destroy();
     }
 
     private function regenerateSessionIfRequired()

@@ -12,3 +12,5 @@ extensions:
             - .phpspec
             - bin
             - vendor
+        blacklist_files:
+            - src/Session/PHPSessionGateway.php

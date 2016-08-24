@@ -88,4 +88,11 @@ class AceAuthSessionSpec extends ObjectBehavior
 
         $this->onSuccessfulAuthentication($user);
     }
+
+    function it_destroys_the_session_when_told_to(SessionGateway $sessionGateway)
+    {
+        $sessionGateway->destroy()->shouldBeCalled();
+
+        $this->destroySession();
+    }
 }
