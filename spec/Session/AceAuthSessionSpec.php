@@ -3,8 +3,8 @@
 namespace spec\CEmerson\AceAuth\Session;
 
 use CEmerson\AceAuth\Session\AceAuthSession;
-use CEmerson\AceAuth\Session\Session;
 use CEmerson\AceAuth\Session\SessionGateway;
+use CEmerson\AceAuth\Users\User;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -62,5 +62,29 @@ class AceAuthSessionSpec extends ObjectBehavior
         $sessionGateway->write(AceAuthSession::SESSION_CANARY_NAME, time())->shouldBeCalled();
 
         $this->init();
+    }
+
+    function it_should_store_the_currently_logged_in_user_on_successful_authentication(
+        SessionGateway $sessionGateway,
+        User $user
+    ) {
+        $user->getUsername()->willReturn('test_username');
+        $sessionGateway->write('currentuser', 'test_username')->shouldBeCalled();
+
+        $this->onSuccessfulAuthentication($user);
+    }
+
+    function it_regenerates_the_session_id_on_successful_authentication(
+        SessionGateway $sessionGateway,
+        User $user
+    ) {
+        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->willReturn(time());
+
+        $user->getUsername()->willReturn('test_username');
+        $sessionGateway->write('currentuser', 'test_username')->shouldBeCalled();
+
+        $sessionGateway->regenerate()->shouldBeCalled();
+
+        $this->onSuccessfulAuthentication($user);
     }
 }
