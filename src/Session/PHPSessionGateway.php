@@ -2,7 +2,7 @@
 
 namespace CEmerson\AceAuth\Session;
 
-class PHPSessionGateway implements SessionGateway
+final class PHPSessionGateway implements SessionGateway
 {
     public function start()
     {
