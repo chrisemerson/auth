@@ -12,12 +12,12 @@ class PlainTextPasswordHashingStrategySpec extends ObjectBehavior
         $this->shouldThrow(new PlainTextPasswordStorageNotSupported())->during('hashPassword', ['test_password']);
     }
 
-    function verification_of_a_correct_password_succeeds()
+    function it_successfully_verifies_a_correct_password()
     {
         $this->verifyPassword('test_password', 'test_password')->shouldReturn(true);
     }
 
-    function verification_of_an_incorrect_password_fails()
+    function it_fails_to_verify_an_incorrect_password()
     {
         $this->verifyPassword('wrong_password', 'test_password')->shouldReturn(false);
     }

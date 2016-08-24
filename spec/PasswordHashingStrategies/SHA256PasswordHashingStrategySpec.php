@@ -13,12 +13,12 @@ class SHA256PasswordHashingStrategySpec extends ObjectBehavior
         $this->hashPassword('test_password')->shouldReturnCI('10A6E6CC8311A3E2BCC09BF6C199ADECD5DD59408C343E926B129C4914F3CB01');
     }
 
-    function verification_of_a_correct_password_succeeds()
+    function it_successfully_verifies_a_correct_password()
     {
         $this->verifyPassword('test_password', '10A6E6CC8311A3E2BCC09BF6C199ADECD5DD59408C343E926B129C4914F3CB01')->shouldReturn(true);
     }
 
-    function verification_of_an_incorrect_password_fails()
+    function it_fails_to_verify_an_incorrect_password()
     {
         $this->verifyPassword('wrong_password', '10A6E6CC8311A3E2BCC09BF6C199ADECD5DD59408C343E926B129C4914F3CB01')->shouldReturn(false);
     }

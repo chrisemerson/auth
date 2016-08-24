@@ -2,3 +2,13 @@ suites:
     default:
         namespace: CEmerson\AceAuth\
         psr4_prefix: CEmerson\AceAuth\
+extensions:
+    PhpSpecCodeCoverage\CodeCoverageExtension:
+        format:
+            - html
+        output:
+            html: coverage
+        blacklist:
+            - .phpspec
+            - bin
+            - vendor

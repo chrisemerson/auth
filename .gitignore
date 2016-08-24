@@ -7,3 +7,6 @@
 ### Dependencies ###
 /bin/
 /vendor/
+
+### Coverage report ###
+/coverage/

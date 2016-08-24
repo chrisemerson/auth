@@ -53,4 +53,41 @@ class AceAuthSpec extends ObjectBehavior
 
         $this->login('username', 'testPassword')->shouldReturn(true);
     }
+
+    function it_delegates_session_management_to_the_session_object_on_login(
+        UserGateway $userGateway,
+        User $user,
+        Session $session
+    ) {
+        $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(true);
+        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+
+        $session->onSuccessfulAuthentication($user)->shouldBeCalled();
+
+        $this->login('username', 'testPassword');
+    }
+
+    function it_doesnt_set_up_the_session_when_login_fails_due_to_user_not_found(
+        UserGateway $userGateway,
+        Session $session
+    ) {
+        $userGateway->findUserByUsername('username')->shouldBeCalled()->willThrow(new UserNotFound());
+
+        $session->onSuccessfulAuthentication()->shouldNotBeCalled();
+
+        $this->login('username', 'testPassword');
+    }
+
+    function it_doesnt_set_up_the_session_when_login_fails_due_to_bad_password(
+        UserGateway $userGateway,
+        User $user,
+        Session $session
+    ) {
+        $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(false);
+        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+
+        $session->onSuccessfulAuthentication()->shouldNotBeCalled();
+
+        $this->login('username', 'testPassword');
+    }
 }

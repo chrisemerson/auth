@@ -2,6 +2,8 @@
 
 namespace CEmerson\AceAuth\Session;
 
+use CEmerson\AceAuth\Users\User;
+
 final class AceAuthSession implements Session
 {
     /** @var SessionGateway */
@@ -10,5 +12,9 @@ final class AceAuthSession implements Session
     public function __construct(SessionGateway $sessionGateway)
     {
         $this->sessionGateway = $sessionGateway;
+    }
+
+    public function onSuccessfulAuthentication(User $authenticatedUser)
+    {
     }
 }
