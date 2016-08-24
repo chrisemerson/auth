@@ -41,7 +41,7 @@ final class AceAuthSession implements Session
         $this->checkSessionStarted();
 
         $this->sessionGateway->write('currentuser', $authenticatedUser->getUsername());
-        $this->sessionGateway->regenerate();
+        $this->regenerateSession();
     }
 
     public function destroySession()

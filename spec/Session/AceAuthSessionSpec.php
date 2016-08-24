@@ -84,6 +84,7 @@ class AceAuthSessionSpec extends ObjectBehavior
         $sessionGateway->write('currentuser', 'test_username')->shouldBeCalled();
 
         $sessionGateway->regenerate()->shouldBeCalled();
+        $sessionGateway->write(AceAuthSession::SESSION_CANARY_NAME, Argument::type('int'))->shouldBeCalled();
 
         $this->onSuccessfulAuthentication($user);
     }
