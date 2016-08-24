@@ -4,6 +4,14 @@ namespace CEmerson\AceAuth\Session;
 
 final class PHPSessionGateway implements SessionGateway
 {
+    /** @var string */
+    private $cookieDomain;
+
+    public function __construct(string $cookieDomain)
+    {
+        $this->cookieDomain = $cookieDomain;
+    }
+
     public function start()
     {
         ini_set('session.use_cookies', 1);
@@ -16,7 +24,7 @@ final class PHPSessionGateway implements SessionGateway
         session_set_cookie_params(
             0,
             '/',
-            null,
+            $this->cookieDomain,
             true,
             true
         );
