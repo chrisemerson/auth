@@ -90,4 +90,11 @@ class AceAuthSpec extends ObjectBehavior
 
         $this->login('username', 'testPassword');
     }
+
+    function it_destroys_the_session_when_user_logs_out(Session $session)
+    {
+        $session->destroySession()->shouldBeCalled();
+
+        $this->logout();
+    }
 }

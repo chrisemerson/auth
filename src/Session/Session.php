@@ -7,4 +7,6 @@ use CEmerson\AceAuth\Users\User;
 interface Session
 {
     public function onSuccessfulAuthentication(User $authenticatedUser);
+
+    public function destroySession();
 }

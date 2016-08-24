@@ -17,4 +17,8 @@ final class AceAuthSession implements Session
     public function onSuccessfulAuthentication(User $authenticatedUser)
     {
     }
+
+    public function destroySession()
+    {
+    }
 }
