@@ -1,6 +1,6 @@
 {
     "name": "cemerson/auth",
-    "description": "A framework & data storage independent authentication library for PHP",
+    "description": "A framework & data storage independent authentication library for PHP 7",
     "license": "MIT",
     "authors": [
         {
