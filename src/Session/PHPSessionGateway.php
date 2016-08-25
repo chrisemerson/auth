@@ -14,12 +14,12 @@ final class PHPSessionGateway implements SessionGateway
 
     public function start()
     {
-        ini_set('session.use_cookies', 1);
-        ini_set('session.use_only_cookies', 1);
-        ini_set('session.entropy_length', 32);
+        ini_set('session.use_cookies', '1');
+        ini_set('session.use_only_cookies', '1');
+        ini_set('session.entropy_length', '32');
         ini_set('session.entropy_file', '/dev/urandom');
         ini_set('session.hash_function', 'sha256');
-        ini_set('session.hash_bits_per_character', 5);
+        ini_set('session.hash_bits_per_character', '5');
 
         session_set_cookie_params(
             0,
