@@ -7,13 +7,16 @@ use CEmerson\AceAuth\Users\User;
 final class AceAuthSession implements Session
 {
     const SESSION_ID_REGENERATION_INTERVAL = 300;
-    const SESSION_CANARY_NAME = 'canary';
+
+    const SESSION_CANARY_NAME = 'aceauth.canary';
+    const SESSION_AUTH_THIS_SESSION_NAME = 'aceauth.auththissession';
+    const SESSION_CURRENT_USER_NAME = 'aceauth.currentuser';
 
     /** @var SessionGateway */
     private $sessionGateway;
 
     /** @var bool */
-    private $sessionStarted = false;
+    private $initialised = false;
 
     public function __construct(SessionGateway $sessionGateway)
     {
@@ -26,29 +29,51 @@ final class AceAuthSession implements Session
 
         $this->regenerateSessionIfRequired();
 
-        $this->sessionStarted = true;
+        $this->initialised = true;
     }
 
     private function checkSessionStarted()
     {
-        if (!$this->sessionStarted) {
+        if (!$this->initialised) {
             $this->init();
         }
+    }
+
+    public function userIsLoggedIn(): bool
+    {
+        return $this->sessionGateway->exists(self::SESSION_CURRENT_USER_NAME);
+    }
+
+    public function getLoggedInUsername(): string
+    {
+        return $this->sessionGateway->read(self::SESSION_CURRENT_USER_NAME);
+    }
+
+    public function userHasAuthenticatedThisSession(): bool
+    {
+        return (
+            $this->sessionGateway->exists(self::SESSION_AUTH_THIS_SESSION_NAME)
+            && $this->sessionGateway->read(self::SESSION_AUTH_THIS_SESSION_NAME) == 1
+        );
     }
 
     public function onSuccessfulAuthentication(User $authenticatedUser)
     {
         $this->checkSessionStarted();
 
-        $this->sessionGateway->write('currentuser', $authenticatedUser->getUsername());
+        $this->sessionGateway->write(self::SESSION_CURRENT_USER_NAME, $authenticatedUser->getUsername());
+        $this->sessionGateway->write(self::SESSION_AUTH_THIS_SESSION_NAME, 1);
+
         $this->regenerateSession();
     }
 
-    public function destroySession()
+    public function deleteAceAuthSessionInfo()
     {
         $this->checkSessionStarted();
 
-        $this->sessionGateway->destroy();
+        $this->sessionGateway->delete(self::SESSION_CURRENT_USER_NAME);
+        $this->sessionGateway->delete(self::SESSION_AUTH_THIS_SESSION_NAME);
+        $this->sessionGateway->delete(self::SESSION_CANARY_NAME);
     }
 
     private function regenerateSessionIfRequired()

@@ -2,6 +2,7 @@
 
 namespace spec\CEmerson\AceAuth;
 
+use CEmerson\AceAuth\Exceptions\NoUserLoggedIn;
 use CEmerson\AceAuth\Exceptions\UserNotFound;
 use CEmerson\AceAuth\Session\Session;
 use CEmerson\AceAuth\Users\User;
@@ -93,8 +94,44 @@ class AceAuthSpec extends ObjectBehavior
 
     function it_destroys_the_session_when_user_logs_out(Session $session)
     {
-        $session->destroySession()->shouldBeCalled();
+        $session->deleteAceAuthSessionInfo()->shouldBeCalled();
 
         $this->logout();
+    }
+
+    function it_delegates_queries_about_whether_the_user_is_logged_in_to_the_session(Session $session)
+    {
+        $session->userIsLoggedIn()->willReturn(false);
+        $this->isLoggedIn()->shouldReturn(false);
+
+        $session->userIsLoggedIn()->willReturn(true);
+        $this->isLoggedIn()->shouldReturn(true);
+    }
+
+    function it_throws_an_exception_when_getting_the_current_user_if_the_user_is_not_logged_in(Session $session)
+    {
+        $session->userIsLoggedIn()->willReturn(false);
+
+        $this->shouldThrow(new NoUserLoggedIn())->during('getCurrentUser');
+    }
+
+    function it_returns_the_currently_logged_in_user(Session $session, UserGateway $userGateway, User $user)
+    {
+        $session->userIsLoggedIn()->willReturn(true);
+        $session->getLoggedInUsername()->willReturn('test_username');
+
+        $userGateway->findUserByUsername('test_username')->shouldBeCalled()->willReturn($user);
+
+        $this->getCurrentUser()->shouldReturn($user);
+    }
+
+    function it_delegates_queries_about_whether_the_user_has_authenticated_this_session_to_the_session_object(
+        Session $session
+    ) {
+        $session->userHasAuthenticatedThisSession()->willReturn(false);
+        $this->hasAuthenticatedThisSession()->shouldReturn(false);
+
+        $session->userHasAuthenticatedThisSession()->willReturn(true);
+        $this->hasAuthenticatedThisSession()->shouldReturn(true);
     }
 }

@@ -6,7 +6,15 @@ use CEmerson\AceAuth\Users\User;
 
 interface Session
 {
+    public function init();
+
+    public function userIsLoggedIn(): bool;
+
+    public function getLoggedInUsername(): string;
+
+    public function userHasAuthenticatedThisSession(): bool;
+
     public function onSuccessfulAuthentication(User $authenticatedUser);
 
-    public function destroySession();
+    public function deleteAceAuthSessionInfo();
 }

@@ -69,7 +69,8 @@ class AceAuthSessionSpec extends ObjectBehavior
         User $user
     ) {
         $user->getUsername()->willReturn('test_username');
-        $sessionGateway->write('currentuser', 'test_username')->shouldBeCalled();
+        $sessionGateway->write(AceAuthSession::SESSION_CURRENT_USER_NAME, 'test_username')->shouldBeCalled();
+        $sessionGateway->write(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME, 1)->shouldBeCalled();
 
         $this->onSuccessfulAuthentication($user);
     }
@@ -81,7 +82,8 @@ class AceAuthSessionSpec extends ObjectBehavior
         $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->willReturn(time());
 
         $user->getUsername()->willReturn('test_username');
-        $sessionGateway->write('currentuser', 'test_username')->shouldBeCalled();
+        $sessionGateway->write(AceAuthSession::SESSION_CURRENT_USER_NAME, 'test_username')->shouldBeCalled();
+        $sessionGateway->write(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME, 1)->shouldBeCalled();
 
         $sessionGateway->regenerate()->shouldBeCalled();
         $sessionGateway->write(AceAuthSession::SESSION_CANARY_NAME, Argument::type('int'))->shouldBeCalled();
@@ -91,8 +93,51 @@ class AceAuthSessionSpec extends ObjectBehavior
 
     function it_destroys_the_session_when_told_to(SessionGateway $sessionGateway)
     {
-        $sessionGateway->destroy()->shouldBeCalled();
+        $sessionGateway->delete(AceAuthSession::SESSION_CURRENT_USER_NAME)->shouldBeCalled();
+        $sessionGateway->delete(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME)->shouldBeCalled();
+        $sessionGateway->delete(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled();
 
-        $this->destroySession();
+        $this->deleteAceAuthSessionInfo();
+    }
+
+    function it_should_delegate_queries_about_whether_the_user_is_logged_in_to_the_session_gateway(
+        SessionGateway $sessionGateway
+    ) {
+        $sessionGateway->exists(AceAuthSession::SESSION_CURRENT_USER_NAME)->shouldBeCalled();
+
+        $this->userIsLoggedIn();
+    }
+
+    function it_should_delegate_queries_about_the_current_user_to_the_session_gateway(SessionGateway $sessionGateway)
+    {
+        $sessionGateway->read(AceAuthSession::SESSION_CURRENT_USER_NAME)->shouldBeCalled()->willReturn('test_username');
+
+        $this->getLoggedInUsername()->shouldReturn('test_username');
+    }
+
+    function it_should_say_the_user_has_not_authenticated_this_session_if_session_var_is_not_set(
+        SessionGateway $sessionGateway
+    ) {
+        $sessionGateway->exists(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME)->willReturn(false);
+
+        $this->userHasAuthenticatedThisSession()->shouldReturn(false);
+    }
+
+    function it_should_say_the_user_has_not_authenticated_this_session_if_session_var_is_set_but_not_1(
+        SessionGateway $sessionGateway
+    ) {
+        $sessionGateway->exists(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME)->willReturn(true);
+        $sessionGateway->read(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME)->willReturn(0);
+
+        $this->userHasAuthenticatedThisSession()->shouldReturn(false);
+    }
+
+    function it_should_say_the_user_has_authenticated_this_session_if_session_var_is_set_and_1(
+        SessionGateway $sessionGateway
+    ) {
+        $sessionGateway->exists(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME)->willReturn(true);
+        $sessionGateway->read(AceAuthSession::SESSION_AUTH_THIS_SESSION_NAME)->willReturn(1);
+
+        $this->userHasAuthenticatedThisSession()->shouldReturn(true);
     }
 }

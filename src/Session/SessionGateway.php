@@ -14,5 +14,5 @@ interface SessionGateway
 
     public function regenerate();
 
-    public function destroy();
+    public function delete(string $name);
 }

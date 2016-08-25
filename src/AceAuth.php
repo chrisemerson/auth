@@ -2,6 +2,7 @@
 
 namespace CEmerson\AceAuth;
 
+use CEmerson\AceAuth\Exceptions\NoUserLoggedIn;
 use CEmerson\AceAuth\Exceptions\UserNotFound;
 use CEmerson\AceAuth\Session\Session;
 use CEmerson\AceAuth\Users\User;
@@ -39,11 +40,6 @@ final class AceAuth implements LoggerAwareInterface
         return $this->attemptUserAuthentication($user, $password);
     }
 
-    public function logout()
-    {
-        $this->session->destroySession();
-    }
-
     private function attemptUserAuthentication(User $user, string $password): bool
     {
         if ($user->verifyPassword($password)) {
@@ -53,5 +49,31 @@ final class AceAuth implements LoggerAwareInterface
         }
 
         return false;
+    }
+
+    public function logout()
+    {
+        $this->session->deleteAceAuthSessionInfo();
+    }
+
+    public function isLoggedIn(): bool
+    {
+        return $this->session->userIsLoggedIn();
+    }
+
+    public function getCurrentUser(): User
+    {
+        if (!$this->isLoggedIn()) {
+            throw new NoUserLoggedIn();
+        }
+
+        return $this->userGateway->findUserByUsername(
+            $this->session->getLoggedInUsername()
+        );
+    }
+
+    public function hasAuthenticatedThisSession(): bool
+    {
+        return $this->session->userHasAuthenticatedThisSession();
     }
 }
