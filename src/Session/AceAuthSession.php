@@ -41,16 +41,22 @@ final class AceAuthSession implements Session
 
     public function userIsLoggedIn(): bool
     {
+        $this->checkSessionStarted();
+
         return $this->sessionGateway->exists(self::SESSION_CURRENT_USER_NAME);
     }
 
     public function getLoggedInUsername(): string
     {
+        $this->checkSessionStarted();
+
         return $this->sessionGateway->read(self::SESSION_CURRENT_USER_NAME);
     }
 
     public function userHasAuthenticatedThisSession(): bool
     {
+        $this->checkSessionStarted();
+
         return (
             $this->sessionGateway->exists(self::SESSION_AUTH_THIS_SESSION_NAME)
             && $this->sessionGateway->read(self::SESSION_AUTH_THIS_SESSION_NAME) == 1
