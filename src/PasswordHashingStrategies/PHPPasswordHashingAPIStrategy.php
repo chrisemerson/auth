@@ -2,13 +2,23 @@
 
 namespace CEmerson\AceAuth\PasswordHashingStrategies;
 
+use CEmerson\AceAuth\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
+
 final class PHPPasswordHashingAPIStrategy implements PasswordHashingStrategy
 {
+    /** @var PHPPasswordAPIWrapper */
+    private $PHPPasswordAPIWrapper;
+
     /** @var int */
     private $algorithm = PASSWORD_DEFAULT;
 
     /** @var array */
     private $options = [];
+
+    public function __construct(PHPPasswordAPIWrapper $PHPPasswordAPIWrapper)
+    {
+        $this->PHPPasswordAPIWrapper = $PHPPasswordAPIWrapper;
+    }
 
     public function setAlgorithm(int $algorithm)
     {
@@ -22,11 +32,11 @@ final class PHPPasswordHashingAPIStrategy implements PasswordHashingStrategy
 
     public function hashPassword(string $password): string
     {
-        return password_hash($password, $this->algorithm, $this->options);
+        return $this->PHPPasswordAPIWrapper->hash($password, $this->algorithm, $this->options);
     }
 
     public function verifyPassword(string $passwordToVerify, string $passwordHash): bool
     {
-        return password_verify($passwordToVerify, $passwordHash);
+        return $this->PHPPasswordAPIWrapper->verify($passwordToVerify, $passwordHash);
     }
 }

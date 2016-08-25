@@ -4,7 +4,7 @@ namespace CEmerson\AceAuth\Users;
 
 use CEmerson\AceAuth\PasswordHashingStrategies\PasswordHashingStrategy;
 
-class TestUser extends User
+final class TestUser extends User
 {
     private $passwordHashingStrategy;
 
