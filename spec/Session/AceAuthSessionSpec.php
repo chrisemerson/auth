@@ -5,7 +5,7 @@ namespace spec\CEmerson\AceAuth\Session;
 use CEmerson\AceAuth\Session\AceAuthSession;
 use CEmerson\AceAuth\Session\SessionGateway;
 use CEmerson\AceAuth\Users\User;
-use CultuurNet\Clock\Clock;
+use CEmerson\Clock\Clock;
 use DateTimeImmutable;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;

@@ -1,6 +1,7 @@
 {
     "name": "cemerson/aceauth",
     "description": "A framework & data storage independent authentication library for PHP",
+    "license": "MIT",
     "authors": [
         {
             "name": "Chris Emerson",
@@ -12,7 +13,7 @@
         "roave/security-advisories": "dev-master@dev",
         "paragonie/password_lock": "^3.0",
         "psr/log": "^1.0",
-        "cultuurnet/clock": "@dev"
+        "cemerson/clock": "^1.0"
     },
     "require-dev": {
         "phpspec/phpspec": "^3.0",
@@ -29,6 +30,7 @@
             "spec\\CEmerson\\AceAuth\\": "spec"
         }
     },
+    "minimum-stability": "stable",
     "config": {
         "bin-dir": "bin"
     }

@@ -3,7 +3,7 @@
 namespace CEmerson\AceAuth\Session;
 
 use CEmerson\AceAuth\Users\User;
-use CultuurNet\Clock\Clock;
+use CEmerson\Clock\Clock;
 
 final class AceAuthSession implements Session
 {
