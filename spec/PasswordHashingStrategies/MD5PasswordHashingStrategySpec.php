@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace spec\CEmerson\AceAuth\PasswordHashingStrategies;
+namespace spec\CEmerson\Auth\PasswordHashingStrategies;
 
 use PhpSpec\ObjectBehavior;
 

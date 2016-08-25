@@ -1,6 +1,6 @@
 <?php
-namespace CEmerson\AceAuth\Exceptions;
+namespace CEmerson\Auth\Exceptions;
 
-class NoUserLoggedIn extends AceAuthException
+class NoUserLoggedIn extends AuthException
 {
 }

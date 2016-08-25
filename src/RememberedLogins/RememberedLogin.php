@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\RememberedLogins;
+namespace CEmerson\Auth\RememberedLogins;
 
 interface RememberedLogin
 {

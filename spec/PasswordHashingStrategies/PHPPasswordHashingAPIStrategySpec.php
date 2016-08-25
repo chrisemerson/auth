@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace spec\CEmerson\AceAuth\PasswordHashingStrategies;
+namespace spec\CEmerson\Auth\PasswordHashingStrategies;
 
-use CEmerson\AceAuth\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
+use CEmerson\Auth\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 

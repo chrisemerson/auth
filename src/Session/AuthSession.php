@@ -1,17 +1,17 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\Session;
+namespace CEmerson\Auth\Session;
 
-use CEmerson\AceAuth\Users\User;
+use CEmerson\Auth\Users\User;
 use CEmerson\Clock\Clock;
 
-final class AceAuthSession implements Session
+final class AuthSession implements Session
 {
     const SESSION_ID_REGENERATION_INTERVAL = 300;
 
-    const SESSION_CANARY_NAME = 'aceauth.canary';
-    const SESSION_AUTH_THIS_SESSION_NAME = 'aceauth.auththissession';
-    const SESSION_CURRENT_USER_NAME = 'aceauth.currentuser';
+    const SESSION_CANARY_NAME = 'cemerson.auth.canary';
+    const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson.auth.auththissession';
+    const SESSION_CURRENT_USER_NAME = 'cemerson.auth.currentuser';
 
     /** @var SessionGateway */
     private $sessionGateway;
@@ -78,7 +78,7 @@ final class AceAuthSession implements Session
         $this->regenerateSession();
     }
 
-    public function deleteAceAuthSessionInfo()
+    public function deleteAuthSessionInfo()
     {
         $this->checkSessionStarted();
 

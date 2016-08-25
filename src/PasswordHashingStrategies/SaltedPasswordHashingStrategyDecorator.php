@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\PasswordHashingStrategies;
+namespace CEmerson\Auth\PasswordHashingStrategies;
 
 class SaltedPasswordHashingStrategyDecorator implements PasswordHashingStrategy
 {

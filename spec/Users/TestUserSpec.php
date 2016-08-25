@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace spec\CEmerson\AceAuth\Users;
+namespace spec\CEmerson\Auth\Users;
 
-use CEmerson\AceAuth\PasswordHashingStrategies\PasswordHashingStrategy;
+use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
 use PhpSpec\ObjectBehavior;
 
 class TestUserSpec extends ObjectBehavior

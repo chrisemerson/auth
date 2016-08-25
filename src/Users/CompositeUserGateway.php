@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\Users;
+namespace CEmerson\Auth\Users;
 
-use CEmerson\AceAuth\Exceptions\UserNotFound;
+use CEmerson\Auth\Exceptions\UserNotFound;
 
 final class CompositeUserGateway implements UserGateway
 {

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\PasswordHashingStrategies;
+namespace CEmerson\Auth\PasswordHashingStrategies;
 
 use Defuse\Crypto\Key;
 use ParagonIE\PasswordLock\PasswordLock;

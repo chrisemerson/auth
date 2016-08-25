@@ -1,7 +1,7 @@
 suites:
     default:
-        namespace: CEmerson\AceAuth\
-        psr4_prefix: CEmerson\AceAuth\
+        namespace: CEmerson\Auth\
+        psr4_prefix: CEmerson\Auth\
 extensions:
     PhpSpecCodeCoverage\CodeCoverageExtension:
         format:

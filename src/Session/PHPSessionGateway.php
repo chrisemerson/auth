@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\Session;
+namespace CEmerson\Auth\Session;
 
 final class PHPSessionGateway implements SessionGateway
 {

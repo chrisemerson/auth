@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace spec\CEmerson\AceAuth\PasswordHashingStrategies;
+namespace spec\CEmerson\Auth\PasswordHashingStrategies;
 
-use CEmerson\AceAuth\PasswordHashingStrategies\PasswordHashingStrategy;
+use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
 use PhpSpec\ObjectBehavior;
 
 class SaltedPasswordHashingStrategyDecoratorSpec extends ObjectBehavior

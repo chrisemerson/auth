@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\PasswordHashingStrategies;
+namespace CEmerson\Auth\PasswordHashingStrategies;
 
-use CEmerson\AceAuth\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
+use CEmerson\Auth\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
 
 final class PHPPasswordHashingAPIStrategy implements PasswordHashingStrategy
 {

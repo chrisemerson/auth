@@ -2,6 +2,8 @@
 
 namespace CEmerson\Auth\Exceptions;
 
-final class PlainTextPasswordStorageNotSupported extends AuthException
+use Exception;
+
+class AuthException extends Exception
 {
 }

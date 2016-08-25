@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\Users;
+namespace CEmerson\Auth\Users;
 
-use CEmerson\AceAuth\PasswordHashingStrategies\PasswordHashingStrategy;
+use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
 
 final class TestUser extends User
 {

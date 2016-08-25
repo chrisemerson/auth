@@ -1,5 +1,5 @@
 {
-    "name": "cemerson/aceauth",
+    "name": "cemerson/auth",
     "description": "A framework & data storage independent authentication library for PHP",
     "license": "MIT",
     "authors": [
@@ -22,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "CEmerson\\AceAuth\\": "src"
+            "CEmerson\\Auth\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "spec\\CEmerson\\AceAuth\\": "spec"
+            "spec\\CEmerson\\Auth\\": "spec"
         }
     },
     "minimum-stability": "stable",

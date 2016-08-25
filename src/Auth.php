@@ -1,17 +1,17 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth;
+namespace CEmerson\Auth;
 
-use CEmerson\AceAuth\Exceptions\NoUserLoggedIn;
-use CEmerson\AceAuth\Exceptions\UserNotFound;
-use CEmerson\AceAuth\Session\Session;
-use CEmerson\AceAuth\Users\User;
-use CEmerson\AceAuth\Users\UserGateway;
+use CEmerson\Auth\Exceptions\NoUserLoggedIn;
+use CEmerson\Auth\Exceptions\UserNotFound;
+use CEmerson\Auth\Session\Session;
+use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\UserGateway;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 
-final class AceAuth implements LoggerAwareInterface
+final class Auth implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
@@ -53,7 +53,7 @@ final class AceAuth implements LoggerAwareInterface
 
     public function logout()
     {
-        $this->session->deleteAceAuthSessionInfo();
+        $this->session->deleteAuthSessionInfo();
     }
 
     public function isLoggedIn(): bool

@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\Session;
+namespace CEmerson\Auth\Session;
 
-use CEmerson\AceAuth\Users\User;
+use CEmerson\Auth\Users\User;
 
 interface Session
 {
@@ -16,5 +16,5 @@ interface Session
 
     public function onSuccessfulAuthentication(User $authenticatedUser);
 
-    public function deleteAceAuthSessionInfo();
+    public function deleteAuthSessionInfo();
 }

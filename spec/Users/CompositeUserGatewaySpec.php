@@ -1,11 +1,11 @@
 <?php declare(strict_types = 1);
 
-namespace spec\CEmerson\AceAuth\Users;
+namespace spec\CEmerson\Auth\Users;
 
 use PhpSpec\ObjectBehavior;
-use CEmerson\AceAuth\Exceptions\UserNotFound;
-use CEmerson\AceAuth\Users\User;
-use CEmerson\AceAuth\Users\UserGateway;
+use CEmerson\Auth\Exceptions\UserNotFound;
+use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\UserGateway;
 
 class CompositeUserGatewaySpec extends ObjectBehavior
 {

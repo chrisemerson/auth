@@ -1,16 +1,16 @@
 <?php declare(strict_types = 1);
 
-namespace spec\CEmerson\AceAuth;
+namespace spec\CEmerson\Auth;
 
-use CEmerson\AceAuth\Exceptions\NoUserLoggedIn;
-use CEmerson\AceAuth\Exceptions\UserNotFound;
-use CEmerson\AceAuth\Session\Session;
-use CEmerson\AceAuth\Users\User;
-use CEmerson\AceAuth\Users\UserGateway;
+use CEmerson\Auth\Exceptions\NoUserLoggedIn;
+use CEmerson\Auth\Exceptions\UserNotFound;
+use CEmerson\Auth\Session\Session;
+use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\UserGateway;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
-class AceAuthSpec extends ObjectBehavior
+class AuthSpec extends ObjectBehavior
 {
     function let(UserGateway $userGateway, Session $session)
     {
@@ -94,7 +94,7 @@ class AceAuthSpec extends ObjectBehavior
 
     function it_destroys_the_session_when_user_logs_out(Session $session)
     {
-        $session->deleteAceAuthSessionInfo()->shouldBeCalled();
+        $session->deleteAuthSessionInfo()->shouldBeCalled();
 
         $this->logout();
     }

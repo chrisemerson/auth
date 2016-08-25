@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\PasswordHashingStrategies;
+namespace CEmerson\Auth\PasswordHashingStrategies;
 
-use CEmerson\AceAuth\Exceptions\PlainTextPasswordStorageNotSupported;
+use CEmerson\Auth\Exceptions\PlainTextPasswordStorageNotSupported;
 
 final class PlainTextPasswordHashingStrategy implements PasswordHashingStrategy
 {

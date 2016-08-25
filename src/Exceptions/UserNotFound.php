@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
-namespace CEmerson\AceAuth\Exceptions;
+namespace CEmerson\Auth\Exceptions;
 
-final class UserNotFound extends AceAuthException
+final class UserNotFound extends AuthException
 {
 }
