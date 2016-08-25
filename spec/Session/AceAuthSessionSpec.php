@@ -43,17 +43,24 @@ class AceAuthSessionSpec extends ObjectBehavior
         $this->init();
     }
 
-    function it_should_regenerate_the_session_id_when_the_canary_indicates_5_minutes_have_passed(SessionGateway $sessionGateway)
-    {
-        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn(self::TEST_CURRENT_TIMESTAMP - AceAuthSession::SESSION_ID_REGENERATION_INTERVAL);
+    function it_should_regenerate_the_session_id_when_the_canary_indicates_5_minutes_have_passed(
+        SessionGateway $sessionGateway
+    ) {
+        $sessionGateway
+            ->read(AceAuthSession::SESSION_CANARY_NAME)
+            ->shouldBeCalled()
+            ->willReturn(self::TEST_CURRENT_TIMESTAMP - AceAuthSession::SESSION_ID_REGENERATION_INTERVAL);
+
         $sessionGateway->regenerate()->shouldBeCalled();
 
         $this->init();
     }
 
-    function it_should_not_regenerate_the_session_id_when_the_canary_indicates_5_minutes_have_not_passed(SessionGateway $sessionGateway)
-    {
-        $halfAnIntervalAgo = self::TEST_CURRENT_TIMESTAMP - (ceil(AceAuthSession::SESSION_ID_REGENERATION_INTERVAL / 2));
+    function it_should_not_regenerate_the_session_id_when_the_canary_indicates_5_minutes_have_not_passed(
+        SessionGateway $sessionGateway
+    ) {
+        $halfAnIntervalAgo =
+            self::TEST_CURRENT_TIMESTAMP - (ceil(AceAuthSession::SESSION_ID_REGENERATION_INTERVAL / 2));
 
         $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn($halfAnIntervalAgo);
 

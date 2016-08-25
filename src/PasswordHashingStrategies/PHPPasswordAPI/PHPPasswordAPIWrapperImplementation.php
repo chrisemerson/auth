@@ -4,7 +4,8 @@ namespace CEmerson\AceAuth\PasswordHashingStrategies\PHPPasswordAPI;
 
 final class PHPPasswordAPIWrapperImplementation implements PHPPasswordAPIWrapper
 {
-    public function hash(string $password, int $algo = PASSWORD_DEFAULT, array $options = []): string {
+    public function hash(string $password, int $algo = PASSWORD_DEFAULT, array $options = []): string
+    {
         return password_hash($password, $algo, $options);
     }
 
