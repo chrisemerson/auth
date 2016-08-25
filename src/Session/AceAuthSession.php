@@ -3,6 +3,7 @@
 namespace CEmerson\AceAuth\Session;
 
 use CEmerson\AceAuth\Users\User;
+use CultuurNet\Clock\Clock;
 
 final class AceAuthSession implements Session
 {
@@ -18,9 +19,13 @@ final class AceAuthSession implements Session
     /** @var bool */
     private $initialised = false;
 
-    public function __construct(SessionGateway $sessionGateway)
+    /** @var Clock */
+    private $clock;
+
+    public function __construct(SessionGateway $sessionGateway, Clock $clock)
     {
         $this->sessionGateway = $sessionGateway;
+        $this->clock = $clock;
     }
 
     public function init()
@@ -102,7 +107,9 @@ final class AceAuthSession implements Session
     private function sessionCanaryIndicatesRegenerationRequired()
     {
         return
-            $this->sessionGateway->read(self::SESSION_CANARY_NAME) <= time() - self::SESSION_ID_REGENERATION_INTERVAL;
+            $this->sessionGateway->read(self::SESSION_CANARY_NAME) <= (
+                $this->getUnixTimestamp() - self::SESSION_ID_REGENERATION_INTERVAL
+            );
     }
 
     private function regenerateSession()
@@ -114,6 +121,11 @@ final class AceAuthSession implements Session
 
     private function writeNewSessionCanary()
     {
-        return $this->sessionGateway->write(self::SESSION_CANARY_NAME, time());
+        return $this->sessionGateway->write(self::SESSION_CANARY_NAME, $this->getUnixTimestamp());
+    }
+
+    private function getUnixTimestamp(): int
+    {
+        return intval($this->clock->getDateTime()->format('U'));
     }
 }

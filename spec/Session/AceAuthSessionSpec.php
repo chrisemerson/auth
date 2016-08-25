@@ -5,20 +5,27 @@ namespace spec\CEmerson\AceAuth\Session;
 use CEmerson\AceAuth\Session\AceAuthSession;
 use CEmerson\AceAuth\Session\SessionGateway;
 use CEmerson\AceAuth\Users\User;
+use CultuurNet\Clock\Clock;
+use DateTimeImmutable;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class AceAuthSessionSpec extends ObjectBehavior
 {
-    function let(SessionGateway $sessionGateway)
+    const TEST_CURRENT_TIMESTAMP = 1472122757;
+
+    function let(SessionGateway $sessionGateway, Clock $clock, DateTimeImmutable $dateTime)
     {
-        $this->beConstructedWith($sessionGateway);
+        $this->beConstructedWith($sessionGateway, $clock);
 
         $sessionGateway->start()->willReturn();
         $sessionGateway->exists(AceAuthSession::SESSION_CANARY_NAME)->willReturn(true);
         $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->willReturn();
         $sessionGateway->write(AceAuthSession::SESSION_CANARY_NAME, Argument::type('int'))->willReturn();
         $sessionGateway->regenerate()->willReturn();
+
+        $dateTime->format('U')->willReturn(self::TEST_CURRENT_TIMESTAMP);
+        $clock->getDateTime()->willReturn($dateTime);
     }
 
     function it_starts_the_session_on_initialisation(SessionGateway $sessionGateway)
@@ -38,7 +45,7 @@ class AceAuthSessionSpec extends ObjectBehavior
 
     function it_should_regenerate_the_session_id_when_the_canary_indicates_5_minutes_have_passed(SessionGateway $sessionGateway)
     {
-        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn(time() - AceAuthSession::SESSION_ID_REGENERATION_INTERVAL);
+        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn(self::TEST_CURRENT_TIMESTAMP - AceAuthSession::SESSION_ID_REGENERATION_INTERVAL);
         $sessionGateway->regenerate()->shouldBeCalled();
 
         $this->init();
@@ -46,9 +53,9 @@ class AceAuthSessionSpec extends ObjectBehavior
 
     function it_should_not_regenerate_the_session_id_when_the_canary_indicates_5_minutes_have_not_passed(SessionGateway $sessionGateway)
     {
-        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn(
-            time() - (ceil(AceAuthSession::SESSION_ID_REGENERATION_INTERVAL / 2))
-        );
+        $halfAnIntervalAgo = self::TEST_CURRENT_TIMESTAMP - (ceil(AceAuthSession::SESSION_ID_REGENERATION_INTERVAL / 2));
+
+        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn($halfAnIntervalAgo);
 
         $sessionGateway->regenerate()->shouldNotBeCalled();
 
@@ -59,7 +66,7 @@ class AceAuthSessionSpec extends ObjectBehavior
     {
         $sessionGateway->exists(AceAuthSession::SESSION_CANARY_NAME)->shouldBeCalled()->willReturn(false);
         $sessionGateway->regenerate()->shouldBeCalled();
-        $sessionGateway->write(AceAuthSession::SESSION_CANARY_NAME, time())->shouldBeCalled();
+        $sessionGateway->write(AceAuthSession::SESSION_CANARY_NAME, self::TEST_CURRENT_TIMESTAMP)->shouldBeCalled();
 
         $this->init();
     }
@@ -79,7 +86,7 @@ class AceAuthSessionSpec extends ObjectBehavior
         SessionGateway $sessionGateway,
         User $user
     ) {
-        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->willReturn(time());
+        $sessionGateway->read(AceAuthSession::SESSION_CANARY_NAME)->willReturn(self::TEST_CURRENT_TIMESTAMP);
 
         $user->getUsername()->willReturn('test_username');
         $sessionGateway->write(AceAuthSession::SESSION_CURRENT_USER_NAME, 'test_username')->shouldBeCalled();
