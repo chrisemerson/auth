@@ -4,92 +4,108 @@ namespace spec\CEmerson\Auth;
 
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
+use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
 use CEmerson\Auth\Session\Session;
-use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\UserGateway;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class AuthSpec extends ObjectBehavior
 {
-    function let(UserGateway $userGateway, Session $session)
-    {
+    const TEST_USERNAME = 'test_username';
+    const TEST_PASSWORD_HASH = 'test_password_hash';
+    const TEST_PASSWORD = 'test_password';
+    const TEST_WRONG_PASSWORD = 'test_wrong_password';
+
+    function let(
+        UserGateway $userGateway,
+        Session $session,
+        AuthUser $user,
+        PasswordHashingStrategy $passwordHashingStrategy
+    ) {
+        $user->getPasswordHashingStrategy()->willReturn($passwordHashingStrategy);
+        $user->getPasswordHash()->willReturn(self::TEST_PASSWORD_HASH);
+
+        $passwordHashingStrategy->verifyPassword(Argument::type('string'), self::TEST_PASSWORD_HASH)->willReturn(false);
+
+        $userGateway->findUserByUsername(self::TEST_USERNAME)->willReturn($user);
+
         $this->beConstructedWith($userGateway, $session);
     }
 
     function it_checks_the_user_gateways_to_find_user(
         UserGateway $userGateway,
-        User $user
+        AuthUser $user
     ) {
-        $user->verifyPassword(Argument::type('string'))->willReturn(true);
-        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+        $userGateway->findUserByUsername(self::TEST_USERNAME)->shouldBeCalled()->willReturn($user);
 
-        $this->login('username', 'password');
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
     }
 
     function it_doesnt_log_in_when_user_isnt_found_in_user_gateway(
         UserGateway $userGateway
     ) {
-        $userGateway->findUserByUsername("username")->willThrow(new UserNotFound());
+        $userGateway->findUserByUsername(self::TEST_USERNAME)->willThrow(new UserNotFound());
 
-        $this->login("username", "password")->shouldReturn(false);
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD)->shouldReturn(false);
     }
 
     function it_doesnt_log_in_when_the_password_is_incorrect_for_the_returned_user(
-        UserGateway $userGateway,
-        User $user
+        PasswordHashingStrategy $passwordHashingStrategy
     ) {
-        $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(false);
-        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+        $passwordHashingStrategy
+            ->verifyPassword(self::TEST_WRONG_PASSWORD, self::TEST_PASSWORD_HASH)
+            ->shouldBeCalled()
+            ->willReturn(false);
 
-        $this->login('username', 'testPassword')->shouldReturn(false);
+        $this->login(self::TEST_USERNAME, self::TEST_WRONG_PASSWORD)->shouldReturn(false);
     }
 
     function it_logs_in_when_the_password_is_correct_for_the_returned_user(
-        UserGateway $userGateway,
-        User $user
+        PasswordHashingStrategy $passwordHashingStrategy
     ) {
-        $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(true);
-        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+        $passwordHashingStrategy
+            ->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)
+            ->shouldBeCalled()
+            ->willReturn(true);
 
-        $this->login('username', 'testPassword')->shouldReturn(true);
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD)->shouldReturn(true);
     }
 
     function it_delegates_session_management_to_the_session_object_on_login(
-        UserGateway $userGateway,
-        User $user,
+        PasswordHashingStrategy $passwordHashingStrategy,
+        AuthUser $user,
         Session $session
     ) {
-        $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(true);
-        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+        $passwordHashingStrategy->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)->willReturn(true);
 
         $session->onSuccessfulAuthentication($user)->shouldBeCalled();
 
-        $this->login('username', 'testPassword');
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
     }
 
     function it_doesnt_set_up_the_session_when_login_fails_due_to_user_not_found(
         UserGateway $userGateway,
         Session $session
     ) {
-        $userGateway->findUserByUsername('username')->shouldBeCalled()->willThrow(new UserNotFound());
+        $userGateway->findUserByUsername(self::TEST_USERNAME)->willThrow(new UserNotFound());
 
-        $session->onSuccessfulAuthentication()->shouldNotBeCalled();
+        $session->onSuccessfulAuthentication(Argument::any())->shouldNotBeCalled();
 
-        $this->login('username', 'testPassword');
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
     }
 
     function it_doesnt_set_up_the_session_when_login_fails_due_to_bad_password(
         UserGateway $userGateway,
-        User $user,
+        AuthUser $user,
         Session $session
     ) {
-        $user->verifyPassword('testPassword')->shouldBeCalled()->willReturn(false);
-        $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
+        $userGateway->findUserByUsername(self::TEST_USERNAME)->willReturn($user);
 
         $session->onSuccessfulAuthentication()->shouldNotBeCalled();
 
-        $this->login('username', 'testPassword');
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
     }
 
     function it_destroys_the_session_when_user_logs_out(Session $session)
@@ -115,12 +131,12 @@ class AuthSpec extends ObjectBehavior
         $this->shouldThrow(new NoUserLoggedIn())->during('getCurrentUser');
     }
 
-    function it_returns_the_currently_logged_in_user(Session $session, UserGateway $userGateway, User $user)
+    function it_returns_the_currently_logged_in_user(Session $session, UserGateway $userGateway, AuthUser $user)
     {
         $session->userIsLoggedIn()->willReturn(true);
-        $session->getLoggedInUsername()->willReturn('test_username');
+        $session->getLoggedInUsername()->willReturn(self::TEST_USERNAME);
 
-        $userGateway->findUserByUsername('test_username')->shouldBeCalled()->willReturn($user);
+        $userGateway->findUserByUsername(self::TEST_USERNAME)->shouldBeCalled()->willReturn($user);
 
         $this->getCurrentUser()->shouldReturn($user);
     }

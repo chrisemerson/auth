@@ -4,7 +4,7 @@ namespace spec\CEmerson\Auth\Users;
 
 use PhpSpec\ObjectBehavior;
 use CEmerson\Auth\Exceptions\UserNotFound;
-use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\UserGateway;
 
 class CompositeUserGatewaySpec extends ObjectBehavior
@@ -33,7 +33,7 @@ class CompositeUserGatewaySpec extends ObjectBehavior
     function it_doesnt_check_the_second_user_gateway_if_the_user_is_found_by_the_first(
         UserGateway $userGateway,
         UserGateway $userGateway2,
-        User $user
+        AuthUser $user
     ) {
         $userGateway->findUserByUsername('username')->shouldBeCalled()->willReturn($user);
         $userGateway2->findUserByUsername('username')->shouldNotBeCalled();

@@ -4,5 +4,5 @@ namespace CEmerson\Auth\Users;
 
 interface UserGateway
 {
-    public function findUserByUsername(string $username): User;
+    public function findUserByUsername(string $username): AuthUser;
 }

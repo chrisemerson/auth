@@ -14,7 +14,7 @@ final class CompositeUserGateway implements UserGateway
         $this->userGateways[] = $userGateway;
     }
 
-    public function findUserByUsername(string $username): User
+    public function findUserByUsername(string $username): AuthUser
     {
         foreach ($this->userGateways as $userGateway) {
             try {

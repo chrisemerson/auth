@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth\Session;
 
-use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Clock\Clock;
 
 final class AuthSession implements Session
@@ -68,7 +68,7 @@ final class AuthSession implements Session
         );
     }
 
-    public function onSuccessfulAuthentication(User $authenticatedUser)
+    public function onSuccessfulAuthentication(AuthUser $authenticatedUser)
     {
         $this->checkSessionStarted();
 

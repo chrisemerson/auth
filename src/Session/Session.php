@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth\Session;
 
-use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\AuthUser;
 
 interface Session
 {
@@ -14,7 +14,7 @@ interface Session
 
     public function userHasAuthenticatedThisSession(): bool;
 
-    public function onSuccessfulAuthentication(User $authenticatedUser);
+    public function onSuccessfulAuthentication(AuthUser $authenticatedUser);
 
     public function deleteAuthSessionInfo();
 }

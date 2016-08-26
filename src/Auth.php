@@ -5,7 +5,7 @@ namespace CEmerson\Auth;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
 use CEmerson\Auth\Session\Session;
-use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\UserGateway;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -40,9 +40,12 @@ final class Auth implements LoggerAwareInterface
         return $this->attemptUserAuthentication($user, $password);
     }
 
-    private function attemptUserAuthentication(User $user, string $password): bool
+    private function attemptUserAuthentication(AuthUser $user, string $password): bool
     {
-        if ($user->verifyPassword($password)) {
+        $passwordHashingStrategy = $user->getPasswordHashingStrategy();
+        $passwordHash = $user->getPasswordHash();
+
+        if ($passwordHashingStrategy->verifyPassword($password, $passwordHash)) {
             $this->session->onSuccessfulAuthentication($user);
 
             return true;
@@ -61,7 +64,7 @@ final class Auth implements LoggerAwareInterface
         return $this->session->userIsLoggedIn();
     }
 
-    public function getCurrentUser(): User
+    public function getCurrentUser(): AuthUser
     {
         if (!$this->isLoggedIn()) {
             throw new NoUserLoggedIn();

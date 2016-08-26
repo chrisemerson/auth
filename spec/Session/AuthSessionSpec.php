@@ -4,7 +4,7 @@ namespace spec\CEmerson\Auth\Session;
 
 use CEmerson\Auth\Session\AuthSession;
 use CEmerson\Auth\Session\SessionGateway;
-use CEmerson\Auth\Users\User;
+use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Clock\Clock;
 use DateTimeImmutable;
 use PhpSpec\ObjectBehavior;
@@ -80,7 +80,7 @@ class AuthSessionSpec extends ObjectBehavior
 
     function it_should_store_the_currently_logged_in_user_on_successful_authentication(
         SessionGateway $sessionGateway,
-        User $user
+        AuthUser $user
     ) {
         $user->getUsername()->willReturn('test_username');
         $sessionGateway->write(AuthSession::SESSION_CURRENT_USER_NAME, 'test_username')->shouldBeCalled();
@@ -91,7 +91,7 @@ class AuthSessionSpec extends ObjectBehavior
 
     function it_regenerates_the_session_id_on_successful_authentication(
         SessionGateway $sessionGateway,
-        User $user
+        AuthUser $user
     ) {
         $sessionGateway->read(AuthSession::SESSION_CANARY_NAME)->willReturn(self::TEST_CURRENT_TIMESTAMP);
 
