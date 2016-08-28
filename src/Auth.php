@@ -6,7 +6,7 @@ use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
 use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
-use CEmerson\Auth\Users\UserGateway;
+use CEmerson\Auth\Users\AuthUserGateway;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
@@ -15,13 +15,13 @@ final class Auth implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    /** @var UserGateway */
+    /** @var AuthUserGateway */
     private $userGateway;
 
     /** @var Session */
     private $session;
 
-    public function __construct(UserGateway $userGateway, Session $session)
+    public function __construct(AuthUserGateway $userGateway, Session $session)
     {
         $this->userGateway = $userGateway;
         $this->session = $session;

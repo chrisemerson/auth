@@ -7,7 +7,7 @@ use CEmerson\Auth\Exceptions\UserNotFound;
 use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
 use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
-use CEmerson\Auth\Users\UserGateway;
+use CEmerson\Auth\Users\AuthUserGateway;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -19,7 +19,7 @@ class AuthSpec extends ObjectBehavior
     const TEST_WRONG_PASSWORD = 'test_wrong_password';
 
     function let(
-        UserGateway $userGateway,
+        AuthUserGateway $userGateway,
         Session $session,
         AuthUser $user,
         PasswordHashingStrategy $passwordHashingStrategy
@@ -35,7 +35,7 @@ class AuthSpec extends ObjectBehavior
     }
 
     function it_checks_the_user_gateways_to_find_user(
-        UserGateway $userGateway,
+        AuthUserGateway $userGateway,
         AuthUser $user
     ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->shouldBeCalled()->willReturn($user);
@@ -44,7 +44,7 @@ class AuthSpec extends ObjectBehavior
     }
 
     function it_doesnt_log_in_when_user_isnt_found_in_user_gateway(
-        UserGateway $userGateway
+        AuthUserGateway $userGateway
     ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->willThrow(new UserNotFound());
 
@@ -86,7 +86,7 @@ class AuthSpec extends ObjectBehavior
     }
 
     function it_doesnt_set_up_the_session_when_login_fails_due_to_user_not_found(
-        UserGateway $userGateway,
+        AuthUserGateway $userGateway,
         Session $session
     ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->willThrow(new UserNotFound());
@@ -97,7 +97,7 @@ class AuthSpec extends ObjectBehavior
     }
 
     function it_doesnt_set_up_the_session_when_login_fails_due_to_bad_password(
-        UserGateway $userGateway,
+        AuthUserGateway $userGateway,
         AuthUser $user,
         Session $session
     ) {
@@ -131,7 +131,7 @@ class AuthSpec extends ObjectBehavior
         $this->shouldThrow(new NoUserLoggedIn())->during('getCurrentUser');
     }
 
-    function it_returns_the_currently_logged_in_user(Session $session, UserGateway $userGateway, AuthUser $user)
+    function it_returns_the_currently_logged_in_user(Session $session, AuthUserGateway $userGateway, AuthUser $user)
     {
         $session->userIsLoggedIn()->willReturn(true);
         $session->getLoggedInUsername()->willReturn(self::TEST_USERNAME);

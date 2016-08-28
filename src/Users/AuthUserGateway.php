@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth\Users;
 
-interface UserGateway
+interface AuthUserGateway
 {
     public function findUserByUsername(string $username): AuthUser;
 }

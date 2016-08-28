@@ -4,12 +4,12 @@ namespace CEmerson\Auth\Users;
 
 use CEmerson\Auth\Exceptions\UserNotFound;
 
-final class CompositeUserGateway implements UserGateway
+final class CompositeAuthUserGateway implements AuthUserGateway
 {
-    /** @var UserGateway[] */
+    /** @var AuthUserGateway[] */
     private $userGateways = [];
 
-    public function addUserGateway(UserGateway $userGateway)
+    public function addUserGateway(AuthUserGateway $userGateway)
     {
         $this->userGateways[] = $userGateway;
     }
