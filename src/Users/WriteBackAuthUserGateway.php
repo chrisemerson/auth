@@ -8,5 +8,5 @@ interface WriteBackAuthUserGateway
 {
     public function getPasswordHashingStrategy(): PasswordHashingStrategy;
 
-    public function saveUser(AuthUser $user, string $newPasswordHash);
+    public function saveUser(AuthUser $oldUser, string $newPasswordHash);
 }
