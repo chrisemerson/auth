@@ -8,6 +8,7 @@ use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
 use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
+use CEmerson\Auth\Users\WriteBackAuthUserGateway;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -15,6 +16,7 @@ class AuthSpec extends ObjectBehavior
 {
     const TEST_USERNAME = 'test_username';
     const TEST_PASSWORD_HASH = 'test_password_hash';
+    const TEST_PASSWORD_NEW_HASH = 'test_password_new_hash';
     const TEST_PASSWORD = 'test_password';
     const TEST_WRONG_PASSWORD = 'test_wrong_password';
 
@@ -149,5 +151,32 @@ class AuthSpec extends ObjectBehavior
 
         $session->userHasAuthenticatedThisSession()->willReturn(true);
         $this->hasAuthenticatedThisSession()->shouldReturn(true);
+    }
+
+    function it_takes_a_writeback_gateway_to_write_successful_logins_back_to(
+        PasswordHashingStrategy $passwordHashingStrategy,
+        WriteBackAuthUserGateway $writeBackAuthUserGateway,
+        AuthUser $user
+    ) {
+        $passwordHashingStrategy->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)->willReturn(true);
+        $passwordHashingStrategy->hashPassword(self::TEST_PASSWORD)->willReturn(self::TEST_PASSWORD_NEW_HASH);
+
+        $writeBackAuthUserGateway->getPasswordHashingStrategy()->willReturn($passwordHashingStrategy);
+        $writeBackAuthUserGateway->saveUser($user, self::TEST_PASSWORD_NEW_HASH)->shouldBeCalled();
+
+        $this->setWriteBackAuthUserGateway($writeBackAuthUserGateway);
+
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
+    }
+
+    function it_doesnt_call_the_writeback_gateway_if_login_fails(
+        WriteBackAuthUserGateway $writeBackAuthUserGateway,
+        AuthUser $user
+    ) {
+        $writeBackAuthUserGateway->saveUser($user, self::TEST_PASSWORD_NEW_HASH)->shouldNotBeCalled();
+
+        $this->setWriteBackAuthUserGateway($writeBackAuthUserGateway);
+
+        $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
     }
 }
