@@ -37,21 +37,21 @@ final class Auth implements LoggerAwareInterface
             return false;
         }
 
-        return $this->attemptUserAuthentication($user, $password);
-    }
-
-    private function attemptUserAuthentication(AuthUser $user, string $password): bool
-    {
-        $passwordHashingStrategy = $user->getPasswordHashingStrategy();
-        $passwordHash = $user->getPasswordHash();
-
-        if ($passwordHashingStrategy->verifyPassword($password, $passwordHash)) {
+        if ($this->verifyPassword($user, $password)) {
             $this->session->onSuccessfulAuthentication($user);
 
             return true;
         }
 
         return false;
+    }
+
+    public function verifyPassword(AuthUser $user, string $password): bool
+    {
+        $passwordHashingStrategy = $user->getPasswordHashingStrategy();
+        $passwordHash = $user->getPasswordHash();
+
+        return $passwordHashingStrategy->verifyPassword($password, $passwordHash);
     }
 
     public function logout()
