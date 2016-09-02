@@ -4,6 +4,7 @@ namespace CEmerson\Auth\Session;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 
 final class PHPSessionGateway implements SessionGateway, LoggerAwareInterface
 {
@@ -15,6 +16,8 @@ final class PHPSessionGateway implements SessionGateway, LoggerAwareInterface
     public function __construct(string $cookieDomain)
     {
         $this->cookieDomain = $cookieDomain;
+
+        $this->setLogger(new NullLogger());
     }
 
     public function start()

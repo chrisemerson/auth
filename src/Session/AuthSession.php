@@ -6,6 +6,7 @@ use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Clock\Clock;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 
 final class AuthSession implements Session, LoggerAwareInterface
 {
@@ -30,6 +31,8 @@ final class AuthSession implements Session, LoggerAwareInterface
     {
         $this->sessionGateway = $sessionGateway;
         $this->clock = $clock;
+
+        $this->setLogger(new NullLogger());
     }
 
     public function init()
