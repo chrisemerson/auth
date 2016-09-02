@@ -4,9 +4,13 @@ namespace CEmerson\Auth\Session;
 
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Clock\Clock;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
-final class AuthSession implements Session
+final class AuthSession implements Session, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     const SESSION_ID_REGENERATION_INTERVAL = 300;
 
     const SESSION_CANARY_NAME = 'cemerson.auth.canary';

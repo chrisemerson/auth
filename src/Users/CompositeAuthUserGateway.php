@@ -3,9 +3,13 @@
 namespace CEmerson\Auth\Users;
 
 use CEmerson\Auth\Exceptions\UserNotFound;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
-final class CompositeAuthUserGateway implements AuthUserGateway
+final class CompositeAuthUserGateway implements AuthUserGateway, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /** @var AuthUserGateway[] */
     private $userGateways = [];
 

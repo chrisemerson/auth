@@ -2,8 +2,13 @@
 
 namespace CEmerson\Auth\Session;
 
-final class PHPSessionGateway implements SessionGateway
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+
+final class PHPSessionGateway implements SessionGateway, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /** @var string */
     private $cookieDomain;
 
