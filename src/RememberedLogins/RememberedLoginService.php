@@ -29,7 +29,10 @@ class RememberedLoginService
     const COOKIE_SELECTOR_NAME = 'cemerson.auth.rememberme';
     const DELIMITER = ':';
 
+    //Default length for remembered login - 30 days
     private $rememberedLoginTTL = 30 * 24 * 60 * 60;
+
+    //Ensure the token stays available in the database for slightly longer than the cookie is valid for
     private $storedRememberedLoginGracePeriod = 60 * 60;
 
     public function __construct(
@@ -46,6 +49,15 @@ class RememberedLoginService
         $this->rememberedLoginFactory = $rememberedLoginFactory;
     }
 
+    public function setRememberedLoginTTL(int $rememberedLoginTTL) {
+        $this->rememberedLoginTTL = $rememberedLoginTTL;
+    }
+
+    public function setStoredRememberedLoginGracePeriod(int $storedRememberedLoginGracePeriod)
+    {
+        $this->storedRememberedLoginGracePeriod = $storedRememberedLoginGracePeriod;
+    }
+
     public function rememberLogin(AuthUser $user)
     {
         $selector = $this->generateToken(20);
@@ -55,14 +67,14 @@ class RememberedLoginService
             '@' . (time() + $this->rememberedLoginTTL + $this->storedRememberedLoginGracePeriod)
         );
 
-        $this->rememberedLoginGateway->saveRememberedLogin(
-            $this->rememberedLoginFactory->createRememberedLogin(
-                $user->getUsername(),
-                $selector,
-                $this->hashToken($token),
-                $expiryDateTime
-            )
+        $rememberedLogin = $this->rememberedLoginFactory->createRememberedLogin(
+            $user->getUsername(),
+            $selector,
+            $this->hashToken($token),
+            $expiryDateTime
         );
+
+        $this->rememberedLoginGateway->saveRememberedLogin($rememberedLogin);
 
         $this->cookieGateway->write(
             self::COOKIE_SELECTOR_NAME,
