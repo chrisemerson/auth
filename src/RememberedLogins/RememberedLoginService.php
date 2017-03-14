@@ -78,20 +78,21 @@ class RememberedLoginService
             list($selector, $token) = explode(self::DELIMITER, $cookieValue);
 
             try {
-                $rememberedLogin = $this->rememberedLoginGateway->findRememberedLoginBySelector($selector);
-
-                if (hash_equals($rememberedLogin->getToken(), $this->hashToken($token))) {
-                    $currentUser = $this->userGateway->findUserByUsername($rememberedLogin->getUsername());
-
-                    $this->session->setCurrentlyLoggedInUser($currentUser);
-
-                    return true;
-                }
+                $this->attemptToSetCurrentUserFromCookie($selector, $token);
             } catch (RememberedLoginNotFound $e) {
             }
         }
+    }
 
-        return false;
+    private function attemptToSetCurrentUserFromCookie($selector, $token)
+    {
+        $rememberedLogin = $this->rememberedLoginGateway->findRememberedLoginBySelector($selector);
+
+        if (hash_equals($rememberedLogin->getToken(), $this->hashToken($token))) {
+            $currentUser = $this->userGateway->findUserByUsername($rememberedLogin->getUsername());
+
+            $this->session->setCurrentlyLoggedInUser($currentUser);
+        }
     }
 
     public function deleteRememberedLogin()
