@@ -1,0 +1,44 @@
+<?php declare(strict_types = 1);
+
+namespace CEmerson\Auth\Cookie;
+
+use CEmerson\Auth\Exceptions\CookieError;
+
+final class PHPCookieGateway implements CookieGateway
+{
+    /** @var string */
+    private $cookieDomain;
+
+    /** @var bool */
+    private $secure;
+
+    public function __construct(string $cookieDomain, bool $secure)
+    {
+        $this->cookieDomain = $cookieDomain;
+        $this->secure = $secure;
+    }
+
+    public function write(string $key, string $value, int $secondsUntilExpiry = 30 * 24 * 60 * 60)
+    {
+        if (!setcookie($key, $value, time() + $secondsUntilExpiry, null, $this->cookieDomain, $this->secure)) {
+            throw new CookieError("Unable to set cookie");
+        }
+    }
+
+    public function exists(string $key): bool
+    {
+        return isset($_COOKIE[$key]);
+    }
+
+    public function read(string $key): string
+    {
+        return $_COOKIE[$key];
+    }
+
+    public function delete(string $key)
+    {
+        if (!setcookie($key, '', time() - 3600, null, $this->cookieDomain, $this->secure)) {
+            throw new CookieError("Unable to delete cookie");
+        }
+    }
+}
