@@ -7,6 +7,7 @@ use CEmerson\Auth\Exceptions\RememberedLoginNotFound;
 use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
+use CEmerson\Clock\Clock;
 use DateTimeImmutable;
 
 class RememberedLoginService
@@ -26,13 +27,17 @@ class RememberedLoginService
     /** @var RememberedLoginFactory */
     private $rememberedLoginFactory;
 
+    /** @var Clock */
+    private $clock;
+
     const COOKIE_SELECTOR_NAME = 'cemerson.auth.rememberme';
+
     const DELIMITER = ':';
-
     //Default length for remembered login - 30 days
-    private $rememberedLoginTTL = 30 * 24 * 60 * 60;
 
+    private $rememberedLoginTTL = 30 * 24 * 60 * 60;
     //Ensure the token stays available in the database for slightly longer than the cookie is valid for
+
     private $storedRememberedLoginGracePeriod = 60 * 60;
 
     public function __construct(
@@ -40,13 +45,15 @@ class RememberedLoginService
         CookieGateway $cookieGateway,
         Session $session,
         AuthUserGateway $userGateway,
-        RememberedLoginFactory $rememberedLoginFactory
+        RememberedLoginFactory $rememberedLoginFactory,
+        Clock $clock
     ) {
         $this->rememberedLoginGateway = $rememberedLoginGateway;
         $this->cookieGateway = $cookieGateway;
         $this->session = $session;
         $this->userGateway = $userGateway;
         $this->rememberedLoginFactory = $rememberedLoginFactory;
+        $this->clock = $clock;
     }
 
     public function setRememberedLoginTTL(int $rememberedLoginTTL) {
@@ -63,9 +70,12 @@ class RememberedLoginService
         $selector = $this->generateToken(20);
         $token = $this->generateToken(20);
 
-        $expiryDateTime = new DateTimeImmutable(
-            '@' . (time() + $this->rememberedLoginTTL + $this->storedRememberedLoginGracePeriod)
-        );
+        $expiryTimestamp =
+            (int) $this->clock->getDateTime()->format('U')
+            + $this->rememberedLoginTTL
+            + $this->storedRememberedLoginGracePeriod;
+
+        $expiryDateTime = new DateTimeImmutable('@' . $expiryTimestamp);
 
         $rememberedLogin = $this->rememberedLoginFactory->createRememberedLogin(
             $user->getUsername(),
@@ -83,20 +93,20 @@ class RememberedLoginService
         );
     }
 
-    public function attemptToLoadRememberedLogin()
+    public function loadRememberedLoginFromCookie()
     {
         if ($this->cookieGateway->exists(self::COOKIE_SELECTOR_NAME)) {
             $cookieValue = $this->cookieGateway->read(self::COOKIE_SELECTOR_NAME);
             list($selector, $token) = explode(self::DELIMITER, $cookieValue);
 
             try {
-                $this->attemptToSetCurrentUserFromCookie($selector, $token);
+                $this->setCurrentUserFromCookie($selector, $token);
             } catch (RememberedLoginNotFound $e) {
             }
         }
     }
 
-    private function attemptToSetCurrentUserFromCookie($selector, $token)
+    private function setCurrentUserFromCookie($selector, $token)
     {
         $rememberedLogin = $this->rememberedLoginGateway->findRememberedLoginBySelector($selector);
 

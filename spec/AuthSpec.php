@@ -224,7 +224,7 @@ class AuthSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn(true);
 
-        $rememberedLoginService->attemptToLoadRememberedLogin()->shouldBeCalled();
+        $rememberedLoginService->loadRememberedLoginFromCookie()->shouldBeCalled();
         $rememberedLoginService->rememberLogin($user)->shouldNotBeCalled();
 
         $session->onSuccessfulAuthentication($user)->shouldBeCalled();
@@ -243,7 +243,7 @@ class AuthSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn(false);
 
-        $rememberedLoginService->attemptToLoadRememberedLogin()->shouldBeCalled();
+        $rememberedLoginService->loadRememberedLoginFromCookie()->shouldBeCalled();
         $rememberedLoginService->rememberLogin($user)->shouldNotBeCalled();
 
         $this->login(self::TEST_USERNAME, self::TEST_WRONG_PASSWORD, true);
@@ -261,7 +261,7 @@ class AuthSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn(true);
 
-        $rememberedLoginService->attemptToLoadRememberedLogin()->shouldBeCalled();
+        $rememberedLoginService->loadRememberedLoginFromCookie()->shouldBeCalled();
         $rememberedLoginService->rememberLogin($user)->shouldBeCalled();
 
         $session->onSuccessfulAuthentication($user)->shouldBeCalled();
@@ -324,7 +324,7 @@ class AuthSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn(true);
 
-        $rememberedLoginService->attemptToLoadRememberedLogin()->shouldBeCalled();
+        $rememberedLoginService->loadRememberedLoginFromCookie()->shouldBeCalled();
         $rememberedLoginService->rememberLogin($user)->shouldBeCalled();
 
         $this->reAuthenticateCurrentUser(self::TEST_PASSWORD);

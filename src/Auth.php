@@ -88,7 +88,7 @@ final class Auth implements LoggerAwareInterface
 
     public function logout()
     {
-        $this->rememberedLoginService->attemptToLoadRememberedLogin();
+        $this->rememberedLoginService->loadRememberedLoginFromCookie();
 
         $this->session->deleteAuthSessionInfo();
         $this->rememberedLoginService->deleteRememberedLogin();
@@ -96,7 +96,7 @@ final class Auth implements LoggerAwareInterface
 
     public function isLoggedIn(): bool
     {
-        $this->rememberedLoginService->attemptToLoadRememberedLogin();
+        $this->rememberedLoginService->loadRememberedLoginFromCookie();
 
         return $this->session->userIsLoggedIn();
     }
@@ -114,7 +114,7 @@ final class Auth implements LoggerAwareInterface
 
     public function hasAuthenticatedThisSession(): bool
     {
-        $this->rememberedLoginService->attemptToLoadRememberedLogin();
+        $this->rememberedLoginService->loadRememberedLoginFromCookie();
 
         return $this->session->userHasAuthenticatedThisSession();
     }
