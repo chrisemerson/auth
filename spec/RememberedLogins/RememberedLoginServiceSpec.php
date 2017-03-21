@@ -3,6 +3,7 @@
 namespace spec\CEmerson\Auth\RememberedLogins;
 
 use CEmerson\Auth\Cookie\CookieGateway;
+use CEmerson\Auth\Exceptions\RememberedLoginNotFound;
 use CEmerson\Auth\RememberedLogins\RememberedLogin;
 use CEmerson\Auth\RememberedLogins\RememberedLoginFactory;
 use CEmerson\Auth\RememberedLogins\RememberedLoginGateway;
@@ -82,9 +83,158 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $this->rememberLogin($user);
     }
 
+    function it_allows_the_remembered_login_ttl_to_be_overridden(
+        RememberedLoginGateway $rememberedLoginGateway,
+        CookieGateway $cookieGateway,
+        RememberedLoginFactory $rememberedLoginFactory,
+        RememberedLogin $rememberedLogin,
+        AuthUser $user,
+        Clock $clock,
+        DateTimeImmutable $dateTime
+    ) {
+        $user->getUsername()->willReturn(self::TEST_USERNAME);
 
+        $clock->getDateTime()->willReturn($dateTime);
+        $dateTime->format('U')->willReturn('1000000');
 
+        $rememberedLoginFactory
+            ->createRememberedLogin(
+                self::TEST_USERNAME,
+                Argument::type('string'),
+                Argument::type('string'),
+                Argument::that(function ($arg) {
+                    return $arg->format('U') == 1002005;
+                })
+            )
+            ->shouldBeCalled()
+            ->willReturn($rememberedLogin);
 
+        $rememberedLoginGateway->saveRememberedLogin($rememberedLogin)->shouldBeCalled();
+
+        $cookieGateway
+            ->write(
+                RememberedLoginService::COOKIE_SELECTOR_NAME,
+                Argument::type('string'),
+                2000
+            )
+            ->shouldBeCalled();
+
+        $this->setRememberedLoginTTL(2000);
+        $this->setStoredRememberedLoginGracePeriod(5);
+
+        $this->rememberLogin($user);
+    }
+
+    function it_allows_the_persisted_remembered_login_grace_period_to_be_overridden(
+        RememberedLoginGateway $rememberedLoginGateway,
+        CookieGateway $cookieGateway,
+        RememberedLoginFactory $rememberedLoginFactory,
+        RememberedLogin $rememberedLogin,
+        AuthUser $user,
+        Clock $clock,
+        DateTimeImmutable $dateTime
+    ) {
+        $user->getUsername()->willReturn(self::TEST_USERNAME);
+
+        $clock->getDateTime()->willReturn($dateTime);
+        $dateTime->format('U')->willReturn('1000000');
+
+        $rememberedLoginFactory
+            ->createRememberedLogin(
+                self::TEST_USERNAME,
+                Argument::type('string'),
+                Argument::type('string'),
+                Argument::that(function ($arg) {
+                    return $arg->format('U') == 1000110;
+                })
+            )
+            ->shouldBeCalled()
+            ->willReturn($rememberedLogin);
+
+        $rememberedLoginGateway->saveRememberedLogin($rememberedLogin)->shouldBeCalled();
+
+        $cookieGateway
+            ->write(
+                RememberedLoginService::COOKIE_SELECTOR_NAME,
+                Argument::type('string'),
+                100
+            )
+            ->shouldBeCalled();
+
+        $this->setRememberedLoginTTL(100);
+        $this->setStoredRememberedLoginGracePeriod(10);
+
+        $this->rememberLogin($user);
+    }
+
+    function it_loads_a_remembered_login_from_a_cookie_if_present(
+        CookieGateway $cookieGateway,
+        RememberedLoginGateway $rememberedLoginGateway,
+        RememberedLogin $rememberedLogin,
+        AuthUserGateway $authUserGateway,
+        AuthUser $authUser,
+        Session $session
+    ) {
+        $cookieGateway->exists(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn(true);
+        $cookieGateway->read(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn('selector:token');
+
+        $rememberedLoginGateway->findRememberedLoginBySelector('selector')->shouldBeCalled()->willReturn($rememberedLogin);
+
+        $rememberedLogin->getToken()->willReturn(hash('sha256', 'token'));
+        $rememberedLogin->getUsername()->willReturn(self::TEST_USERNAME);
+
+        $authUserGateway->findUserByUsername(self::TEST_USERNAME)->willReturn($authUser);
+
+        $session->setCurrentlyLoggedInUser($authUser)->shouldBeCalled();
+
+        $this->loadRememberedLoginFromCookie();
+    }
+
+    function it_doesnt_set_the_current_user_if_the_cookie_doesnt_exist(
+        CookieGateway $cookieGateway,
+        Session $session
+    ) {
+        $cookieGateway->exists(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn(false);
+
+        $session->setCurrentlyLoggedInUser(Argument::any())->shouldNotBeCalled();
+
+        $this->loadRememberedLoginFromCookie();
+    }
+
+    function it_doesnt_set_the_current_user_if_the_cookie_exists_but_doesnt_contain_a_valid_remembered_login(
+        CookieGateway $cookieGateway,
+        Session $session,
+        RememberedLoginGateway $rememberedLoginGateway
+    ) {
+        $cookieGateway->exists(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn(true);
+        $cookieGateway->read(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn('selector:token');
+
+        $rememberedLoginGateway->findRememberedLoginBySelector('selector')->shouldBeCalled()->willThrow(
+            new RememberedLoginNotFound()
+        );
+
+        $session->setCurrentlyLoggedInUser(Argument::any())->shouldNotBeCalled();
+
+        $this->loadRememberedLoginFromCookie();
+    }
+
+    function it_doesnt_set_the_current_user_if_the_cookie_exists_and_remembered_login_exists_but_token_is_incorrect(
+        CookieGateway $cookieGateway,
+        Session $session,
+        RememberedLoginGateway $rememberedLoginGateway,
+        RememberedLogin $rememberedLogin
+    ) {
+        $cookieGateway->exists(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn(true);
+        $cookieGateway->read(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn('selector:token');
+
+        $rememberedLoginGateway->findRememberedLoginBySelector('selector')->shouldBeCalled()->willReturn($rememberedLogin);
+
+        $rememberedLogin->getToken()->willReturn('somethingwrong');
+
+        $session->setCurrentlyLoggedInUser(Argument::any())->shouldNotBeCalled();
+
+        $this->loadRememberedLoginFromCookie();
+    }
 
     function it_deletes_remembered_logins_on_request(CookieGateway $cookieGateway)
     {
