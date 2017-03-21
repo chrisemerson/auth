@@ -9,7 +9,8 @@ use CEmerson\Auth\Users\AuthUserGateway;
 
 class CompositeAuthUserGatewaySpec extends ObjectBehavior
 {
-    function it_checks_the_user_gateways_to_find_user(AuthUserGateway $userGateway) {
+    function it_checks_the_user_gateways_to_find_user(AuthUserGateway $userGateway)
+    {
         $userGateway->findUserByUsername('username')->shouldBeCalled();
 
         $this->addUserGateway($userGateway);

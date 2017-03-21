@@ -25,7 +25,14 @@ final class PHPCookieGateway implements CookieGateway
 
     public function write(string $key, string $value, int $secondsUntilExpiry = 30 * 24 * 60 * 60)
     {
-        if (!setcookie($key, $value, $this->getCurrentTimestamp() + $secondsUntilExpiry, null, $this->cookieDomain, $this->secure)) {
+        if (!setcookie(
+            $key,
+            $value,
+            $this->getCurrentTimestamp() + $secondsUntilExpiry,
+            null,
+            $this->cookieDomain,
+            $this->secure
+        )) {
             throw new CookieError("Unable to set cookie");
         }
     }

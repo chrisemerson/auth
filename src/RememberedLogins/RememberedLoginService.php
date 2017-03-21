@@ -56,7 +56,8 @@ class RememberedLoginService
         $this->clock = $clock;
     }
 
-    public function setRememberedLoginTTL(int $rememberedLoginTTL) {
+    public function setRememberedLoginTTL(int $rememberedLoginTTL)
+    {
         $this->rememberedLoginTTL = $rememberedLoginTTL;
     }
 

@@ -28,8 +28,7 @@ class AuthSpec extends ObjectBehavior
         RememberedLoginService $rememberedLoginService,
         AuthUser $user,
         PasswordHashingStrategy $passwordHashingStrategy
-    )
-    {
+    ) {
         $user->getPasswordHashingStrategy()->willReturn($passwordHashingStrategy);
         $user->getPasswordHash()->willReturn(self::TEST_PASSWORD_HASH);
 
@@ -45,8 +44,7 @@ class AuthSpec extends ObjectBehavior
     function it_checks_the_user_gateways_to_find_user(
         AuthUserGateway $userGateway,
         AuthUser $user
-    )
-    {
+    ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->shouldBeCalled()->willReturn($user);
 
         $this->login(self::TEST_USERNAME, self::TEST_PASSWORD);
@@ -54,8 +52,7 @@ class AuthSpec extends ObjectBehavior
 
     function it_doesnt_log_in_when_user_isnt_found_in_user_gateway(
         AuthUserGateway $userGateway
-    )
-    {
+    ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->willThrow(new UserNotFound());
 
         $this->login(self::TEST_USERNAME, self::TEST_PASSWORD)->shouldReturn(false);
@@ -63,8 +60,7 @@ class AuthSpec extends ObjectBehavior
 
     function it_doesnt_log_in_when_the_password_is_incorrect_for_the_returned_user(
         PasswordHashingStrategy $passwordHashingStrategy
-    )
-    {
+    ) {
         $passwordHashingStrategy
             ->verifyPassword(self::TEST_WRONG_PASSWORD, self::TEST_PASSWORD_HASH)
             ->shouldBeCalled()
@@ -75,8 +71,7 @@ class AuthSpec extends ObjectBehavior
 
     function it_doesnt_log_in_if_a_user_is_already_logged_in(
         Session $session
-    )
-    {
+    ) {
         $session->userIsLoggedIn()->shouldBeCalled()->willReturn(true);
 
         $this->shouldThrow(new UserAlreadyLoggedIn())->during('login', [self::TEST_USERNAME, self::TEST_PASSWORD]);
@@ -86,8 +81,7 @@ class AuthSpec extends ObjectBehavior
         PasswordHashingStrategy $passwordHashingStrategy,
         Session $session,
         AuthUser $user
-    )
-    {
+    ) {
         $passwordHashingStrategy
             ->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)
             ->shouldBeCalled()
@@ -102,8 +96,7 @@ class AuthSpec extends ObjectBehavior
         PasswordHashingStrategy $passwordHashingStrategy,
         AuthUser $user,
         Session $session
-    )
-    {
+    ) {
         $passwordHashingStrategy->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)->willReturn(true);
 
         $session->onSuccessfulAuthentication($user)->shouldBeCalled();
@@ -114,8 +107,7 @@ class AuthSpec extends ObjectBehavior
     function it_doesnt_set_up_the_session_when_login_fails_due_to_user_not_found(
         AuthUserGateway $userGateway,
         Session $session
-    )
-    {
+    ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->willThrow(new UserNotFound());
 
         $session->onSuccessfulAuthentication(Argument::any())->shouldNotBeCalled();
@@ -127,8 +119,7 @@ class AuthSpec extends ObjectBehavior
         AuthUserGateway $userGateway,
         AuthUser $user,
         Session $session
-    )
-    {
+    ) {
         $userGateway->findUserByUsername(self::TEST_USERNAME)->willReturn($user);
 
         $session->onSuccessfulAuthentication()->shouldNotBeCalled();
@@ -171,8 +162,7 @@ class AuthSpec extends ObjectBehavior
 
     function it_delegates_queries_about_whether_the_user_has_authenticated_this_session_to_the_session_object(
         Session $session
-    )
-    {
+    ) {
         $session->userHasAuthenticatedThisSession()->willReturn(false);
         $this->hasAuthenticatedThisSession()->shouldReturn(false);
 
@@ -185,8 +175,7 @@ class AuthSpec extends ObjectBehavior
         WriteBackAuthUserGateway $writeBackAuthUserGateway,
         Session $session,
         AuthUser $user
-    )
-    {
+    ) {
         $passwordHashingStrategy->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)->willReturn(true);
         $passwordHashingStrategy->hashPassword(self::TEST_PASSWORD)->willReturn(self::TEST_PASSWORD_NEW_HASH);
 
@@ -203,8 +192,7 @@ class AuthSpec extends ObjectBehavior
     function it_doesnt_call_the_writeback_gateway_if_login_fails(
         WriteBackAuthUserGateway $writeBackAuthUserGateway,
         AuthUser $user
-    )
-    {
+    ) {
         $writeBackAuthUserGateway->saveUser($user, self::TEST_PASSWORD_NEW_HASH)->shouldNotBeCalled();
 
         $this->setWriteBackAuthUserGateway($writeBackAuthUserGateway);
@@ -217,8 +205,7 @@ class AuthSpec extends ObjectBehavior
         RememberedLoginService $rememberedLoginService,
         Session $session,
         AuthUser $user
-    )
-    {
+    ) {
         $passwordHashingStrategy
             ->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)
             ->shouldBeCalled()
@@ -236,8 +223,7 @@ class AuthSpec extends ObjectBehavior
         PasswordHashingStrategy $passwordHashingStrategy,
         RememberedLoginService $rememberedLoginService,
         AuthUser $user
-    )
-    {
+    ) {
         $passwordHashingStrategy
             ->verifyPassword(self::TEST_WRONG_PASSWORD, self::TEST_PASSWORD_HASH)
             ->shouldBeCalled()
@@ -254,8 +240,7 @@ class AuthSpec extends ObjectBehavior
         RememberedLoginService $rememberedLoginService,
         Session $session,
         AuthUser $user
-    )
-    {
+    ) {
         $passwordHashingStrategy
             ->verifyPassword(self::TEST_PASSWORD, self::TEST_PASSWORD_HASH)
             ->shouldBeCalled()
