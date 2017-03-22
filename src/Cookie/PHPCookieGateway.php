@@ -29,7 +29,7 @@ final class PHPCookieGateway implements CookieGateway
             $key,
             $value,
             $this->getCurrentTimestamp() + $secondsUntilExpiry,
-            null,
+            '/',
             $this->cookieDomain,
             $this->secure
         )) {
@@ -49,7 +49,7 @@ final class PHPCookieGateway implements CookieGateway
 
     public function delete(string $key)
     {
-        if (!setcookie($key, '', $this->getCurrentTimestamp() - 3600, null, $this->cookieDomain, $this->secure)) {
+        if (!setcookie($key, '', $this->getCurrentTimestamp() - 3600, '/', $this->cookieDomain, $this->secure)) {
             throw new CookieError("Unable to delete cookie");
         }
     }
