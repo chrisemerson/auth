@@ -8,7 +8,7 @@ use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
 use CEmerson\Clock\Clock;
-use DateTimeImmutable;
+use DateInterval;
 
 class RememberedLoginService
 {
@@ -71,18 +71,13 @@ class RememberedLoginService
         $selector = $this->generateToken(20);
         $token = $this->generateToken(20);
 
-        $expiryTimestamp =
-            (int) $this->clock->getDateTime()->format('U')
-            + $this->rememberedLoginTTL
-            + $this->storedRememberedLoginGracePeriod;
-
-        $expiryDateTime = new DateTimeImmutable('@' . $expiryTimestamp);
+        $expiryDateTime = $this->clock->getDateTime()->add(new DateInterval('PT' . $this->rememberedLoginTTL . 'S'));
 
         $rememberedLogin = $this->rememberedLoginFactory->createRememberedLogin(
             $user->getUsername(),
             $selector,
             $this->hashToken($token),
-            $expiryDateTime
+            $expiryDateTime->add(new DateInterval('PT' . $this->storedRememberedLoginGracePeriod . 'S'))
         );
 
         $this->rememberedLoginGateway->saveRememberedLogin($rememberedLogin);
@@ -90,7 +85,7 @@ class RememberedLoginService
         $this->cookieGateway->write(
             self::COOKIE_SELECTOR_NAME,
             $selector . self::DELIMITER . $token,
-            $this->rememberedLoginTTL
+            $expiryDateTime
         );
     }
 

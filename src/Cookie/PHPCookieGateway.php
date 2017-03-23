@@ -4,6 +4,7 @@ namespace CEmerson\Auth\Cookie;
 
 use CEmerson\Auth\Exceptions\CookieError;
 use CEmerson\Clock\Clock;
+use DateTimeInterface;
 
 final class PHPCookieGateway implements CookieGateway
 {
@@ -13,22 +14,18 @@ final class PHPCookieGateway implements CookieGateway
     /** @var bool */
     private $secure;
 
-    /** @var Clock */
-    private $clock;
-
-    public function __construct(string $cookieDomain, bool $secure, Clock $clock)
+    public function __construct(string $cookieDomain, bool $secure)
     {
         $this->cookieDomain = $cookieDomain;
         $this->secure = $secure;
-        $this->clock = $clock;
     }
 
-    public function write(string $key, string $value, int $secondsUntilExpiry = 30 * 24 * 60 * 60)
+    public function write(string $key, string $value, DateTimeInterface $expiryDateTime)
     {
         if (!setcookie(
             $key,
             $value,
-            $this->getCurrentTimestamp() + $secondsUntilExpiry,
+            $expiryDateTime->format('U'),
             '/',
             $this->cookieDomain,
             $this->secure
@@ -49,13 +46,8 @@ final class PHPCookieGateway implements CookieGateway
 
     public function delete(string $key)
     {
-        if (!setcookie($key, '', $this->getCurrentTimestamp() - 3600, '/', $this->cookieDomain, $this->secure)) {
+        if (!setcookie($key, '', 0, '/', $this->cookieDomain, $this->secure)) {
             throw new CookieError("Unable to delete cookie");
         }
-    }
-
-    private function getCurrentTimestamp(): int
-    {
-        return (int) $this->clock->getDateTime()->format('u');
     }
 }

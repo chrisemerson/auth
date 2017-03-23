@@ -2,9 +2,11 @@
 
 namespace CEmerson\Auth\Cookie;
 
+use DateTimeInterface;
+
 interface CookieGateway
 {
-    public function write(string $key, string $value, int $secondsUntilExpiry = 30 * 24 * 60 * 60);
+    public function write(string $key, string $value, DateTimeInterface $expiryDateTime);
 
     public function exists(string $key): bool;
 

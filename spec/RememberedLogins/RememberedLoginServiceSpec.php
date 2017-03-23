@@ -12,6 +12,7 @@ use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
 use CEmerson\Clock\Clock;
+use DateInterval;
 use DateTimeImmutable;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -53,7 +54,24 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $user->getUsername()->willReturn(self::TEST_USERNAME);
 
         $clock->getDateTime()->willReturn($dateTime);
+
         $dateTime->format('U')->willReturn('1000000');
+
+        $dateTime->add(Argument::that(function ($arg) {
+            return ($arg instanceof DateInterval);
+        }))->will(function ($args, $mock) {
+            $mock->format('U')->willReturn(1000000 + (30 * 24 * 60 * 60));
+
+            $mock->add(Argument::that(function ($arg) {
+                return ($arg instanceof DateInterval);
+            }))->will(function ($args, $mock) {
+                $mock->format('U')->willReturn(1000000 + (30 * 24 * 60 * 60) + (60 * 60));
+
+                return $mock;
+            });
+
+            return $mock;
+        });
 
         $rememberedLoginFactory
             ->createRememberedLogin(
@@ -61,7 +79,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
                 Argument::type('string'),
                 Argument::type('string'),
                 Argument::that(function ($arg) {
-                    return $arg->format('U') == 1000105;
+                    return $arg->format('U') == 1000000 + (0 * 24 * 60 * 60) + (60 * 60);
                 })
             )
             ->shouldBeCalled()
@@ -73,12 +91,11 @@ class RememberedLoginServiceSpec extends ObjectBehavior
             ->write(
                 RememberedLoginService::COOKIE_SELECTOR_NAME,
                 Argument::type('string'),
-                100
+                Argument::that(function ($arg) {
+                    return $arg->format('U') == 1000000 + (0 * 24 * 60 * 60);
+                })
             )
             ->shouldBeCalled();
-
-        $this->setRememberedLoginTTL(100);
-        $this->setStoredRememberedLoginGracePeriod(5);
 
         $this->rememberLogin($user);
     }
@@ -95,6 +112,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $user->getUsername()->willReturn(self::TEST_USERNAME);
 
         $clock->getDateTime()->willReturn($dateTime);
+        $dateTime->add(Argument::type(DateInterval::class))->willReturn($dateTime);
         $dateTime->format('U')->willReturn('1000000');
 
         $rememberedLoginFactory
@@ -103,7 +121,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
                 Argument::type('string'),
                 Argument::type('string'),
                 Argument::that(function ($arg) {
-                    return $arg->format('U') == 1002005;
+                    return $arg->format('U') == 1000000;
                 })
             )
             ->shouldBeCalled()
@@ -115,12 +133,13 @@ class RememberedLoginServiceSpec extends ObjectBehavior
             ->write(
                 RememberedLoginService::COOKIE_SELECTOR_NAME,
                 Argument::type('string'),
-                2000
+                Argument::that(function ($arg) {
+                    return $arg->format('U') == 1000000;
+                })
             )
             ->shouldBeCalled();
 
         $this->setRememberedLoginTTL(2000);
-        $this->setStoredRememberedLoginGracePeriod(5);
 
         $this->rememberLogin($user);
     }
@@ -137,6 +156,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $user->getUsername()->willReturn(self::TEST_USERNAME);
 
         $clock->getDateTime()->willReturn($dateTime);
+        $dateTime->add(Argument::type(DateInterval::class))->willReturn($dateTime);
         $dateTime->format('U')->willReturn('1000000');
 
         $rememberedLoginFactory
@@ -145,7 +165,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
                 Argument::type('string'),
                 Argument::type('string'),
                 Argument::that(function ($arg) {
-                    return $arg->format('U') == 1000110;
+                    return $arg->format('U') == 1000000;
                 })
             )
             ->shouldBeCalled()
@@ -157,11 +177,12 @@ class RememberedLoginServiceSpec extends ObjectBehavior
             ->write(
                 RememberedLoginService::COOKIE_SELECTOR_NAME,
                 Argument::type('string'),
-                100
+                Argument::that(function ($arg) {
+                    return $arg->format('U') == 1000000;
+                })
             )
             ->shouldBeCalled();
 
-        $this->setRememberedLoginTTL(100);
         $this->setStoredRememberedLoginGracePeriod(10);
 
         $this->rememberLogin($user);
@@ -258,5 +279,10 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $cookieGateway->delete(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled();
 
         $this->deleteRememberedLogin();
+    }
+
+    public static function convertDateIntervalToSeconds(DateInterval $dateInterval)
+    {
+        return $dateInterval->days * 86400 + $dateInterval->h * 3600 + $dateInterval->i * 60 + $dateInterval->s;
     }
 }
