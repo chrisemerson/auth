@@ -14,9 +14,9 @@ final class AuthSession implements Session, LoggerAwareInterface
 
     const SESSION_ID_REGENERATION_INTERVAL = 300;
 
-    const SESSION_CANARY_NAME = 'cemerson.auth.canary';
-    const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson.auth.auththissession';
-    const SESSION_CURRENT_USER_NAME = 'cemerson.auth.currentuser';
+    const SESSION_CANARY_NAME = 'cemerson_auth_canary';
+    const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson_auth_auththissession';
+    const SESSION_CURRENT_USER_NAME = 'cemerson_auth_currentuser';
 
     /** @var SessionGateway */
     private $sessionGateway;

@@ -8,7 +8,6 @@ use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
 use CEmerson\Clock\Clock;
-use DateInterval;
 use DateTimeImmutable;
 
 class RememberedLoginService
@@ -31,7 +30,7 @@ class RememberedLoginService
     /** @var Clock */
     private $clock;
 
-    const COOKIE_SELECTOR_NAME = 'cemerson.auth.rememberme';
+    const COOKIE_SELECTOR_NAME = 'cemerson_auth_rememberme';
 
     const DELIMITER = ':';
     //Default length for remembered login - 30 days
