@@ -11,4 +11,6 @@ interface RememberedLoginGateway
     public function deleteRememberedLoginBySelector(string $selector);
 
     public function deleteAllRememberedLoginsForUser(string $username);
+
+    public function cleanupExpiredRememberedLogins();
 }

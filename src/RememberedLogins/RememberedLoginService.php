@@ -135,4 +135,9 @@ class RememberedLoginService
     {
         return hash('sha256', $token);
     }
+
+    public function cleanupExpiredRememberedLogins()
+    {
+        $this->rememberedLoginGateway->cleanupExpiredRememberedLogins();
+    }
 }

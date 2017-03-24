@@ -134,4 +134,9 @@ final class Auth implements LoggerAwareInterface
             $this->writeBackAuthUserGateway->saveUser($user, $newPasswordHash);
         }
     }
+
+    public function cleanup()
+    {
+        $this->rememberedLoginService->cleanupExpiredRememberedLogins();
+    }
 }
