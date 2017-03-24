@@ -102,7 +102,7 @@ class RememberedLoginService
         }
     }
 
-    private function setCurrentUserFromCookie($selector, $token)
+    private function setCurrentUserFromCookie(string $selector, string $token)
     {
         $rememberedLogin = $this->rememberedLoginGateway->findRememberedLoginBySelector($selector);
 
