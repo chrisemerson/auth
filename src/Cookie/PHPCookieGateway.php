@@ -3,7 +3,6 @@
 namespace CEmerson\Auth\Cookie;
 
 use CEmerson\Auth\Exceptions\CookieError;
-use CEmerson\Clock\Clock;
 use DateTimeInterface;
 
 final class PHPCookieGateway implements CookieGateway
@@ -25,7 +24,7 @@ final class PHPCookieGateway implements CookieGateway
         if (!setcookie(
             $key,
             $value,
-            $expiryDateTime->format('U'),
+            $expiryDateTime->getTimestamp(),
             '/',
             $this->cookieDomain,
             $this->secure
