@@ -31,8 +31,12 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         Session $session,
         AuthUserGateway $authUserGateway,
         RememberedLoginFactory $rememberedLoginFactory,
-        Clock $clock
+        Clock $clock,
+        DateTimeImmutable $dateTime
     ) {
+        $clock->getDateTime()->willReturn($dateTime);
+        $dateTime->getTimestamp()->willReturn(1000000);
+
         $this->beConstructedWith(
             $rememberedLoginGateway,
             $cookieGateway,
@@ -122,14 +126,15 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $cookieGateway
             ->read(RememberedLoginService::COOKIE_SELECTOR_NAME)
             ->shouldBeCalled()
-            ->willReturn('selector:token');
+            ->willReturn(self::TEST_SELECTOR . ':' . self::TEST_TOKEN);
 
         $rememberedLoginGateway
-            ->findRememberedLoginBySelector('selector')
+            ->findRememberedLoginBySelector(self::TEST_SELECTOR)
             ->shouldBeCalled()
             ->willReturn($rememberedLogin);
 
-        $rememberedLogin->getToken()->willReturn(hash('sha256', 'token'));
+        $rememberedLogin->getExpiryDateTime()->willReturn(new DateTimeImmutable('@2000000'));
+        $rememberedLogin->getToken()->willReturn(hash('sha256', self::TEST_TOKEN));
         $rememberedLogin->getUsername()->willReturn(self::TEST_USERNAME);
 
         $authUserGateway->findUserByUsername(self::TEST_USERNAME)->willReturn($authUser);
@@ -160,9 +165,9 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $cookieGateway
             ->read(RememberedLoginService::COOKIE_SELECTOR_NAME)
             ->shouldBeCalled()
-            ->willReturn('selector:token');
+            ->willReturn(self::TEST_SELECTOR . ':' . self::TEST_TOKEN);
 
-        $rememberedLoginGateway->findRememberedLoginBySelector('selector')->shouldBeCalled()->willThrow(
+        $rememberedLoginGateway->findRememberedLoginBySelector(self::TEST_SELECTOR)->shouldBeCalled()->willThrow(
             new RememberedLoginNotFound()
         );
 
@@ -182,14 +187,46 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         $cookieGateway
             ->read(RememberedLoginService::COOKIE_SELECTOR_NAME)
             ->shouldBeCalled()
-            ->willReturn('selector:token');
+            ->willReturn(self::TEST_SELECTOR . ':' . self::TEST_TOKEN);
 
         $rememberedLoginGateway
-            ->findRememberedLoginBySelector('selector')
+            ->findRememberedLoginBySelector(self::TEST_SELECTOR)
             ->shouldBeCalled()
             ->willReturn($rememberedLogin);
 
+        $rememberedLogin->getExpiryDateTime()->willReturn(new DateTimeImmutable('@2000000'));
         $rememberedLogin->getToken()->willReturn('somethingwrong');
+
+        $session->setCurrentlyLoggedInUser(Argument::any())->shouldNotBeCalled();
+
+        $this->loadRememberedLoginFromCookie();
+    }
+
+    function it_doesnt_set_the_current_user_if_the_cookie_exists_but_remembered_login_has_expired(
+        CookieGateway $cookieGateway,
+        Session $session,
+        RememberedLoginGateway $rememberedLoginGateway,
+        RememberedLogin $rememberedLogin,
+        Clock $clock,
+        DateTimeImmutable $dateTime
+    ) {
+        $cookieGateway->exists(RememberedLoginService::COOKIE_SELECTOR_NAME)->shouldBeCalled()->willReturn(true);
+
+        $cookieGateway
+            ->read(RememberedLoginService::COOKIE_SELECTOR_NAME)
+            ->shouldBeCalled()
+            ->willReturn(self::TEST_SELECTOR . ':' . self::TEST_TOKEN);
+
+        $rememberedLoginGateway
+            ->findRememberedLoginBySelector(self::TEST_SELECTOR)
+            ->shouldBeCalled()
+            ->willReturn($rememberedLogin);
+
+        $clock->getDateTime()->willReturn($dateTime);
+        $dateTime->getTimestamp()->willReturn(1000000);
+
+        $rememberedLogin->getExpiryDateTime()->willReturn(new DateTimeImmutable('@500000'));
+        $rememberedLogin->getToken()->willReturn(hash('sha256', self::TEST_TOKEN));
 
         $session->setCurrentlyLoggedInUser(Argument::any())->shouldNotBeCalled();
 
@@ -269,6 +306,9 @@ class RememberedLoginServiceSpec extends ObjectBehavior
                 })
             )
             ->shouldBeCalled();
+
+        $this->setRememberedLoginTTL($expectedTTL);
+        $this->setStoredRememberedLoginGracePeriod($expectedGracePeriod);
 
         $this->setStoredRememberedLoginGracePeriod($expectedGracePeriod);
 

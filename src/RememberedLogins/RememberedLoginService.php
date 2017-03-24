@@ -107,11 +107,18 @@ class RememberedLoginService
     {
         $rememberedLogin = $this->rememberedLoginGateway->findRememberedLoginBySelector($selector);
 
-        if (hash_equals($rememberedLogin->getToken(), $this->hashToken($token))) {
-            $currentUser = $this->userGateway->findUserByUsername($rememberedLogin->getUsername());
+        if ($this->rememberedLoginHasNotExpired($rememberedLogin)) {
+            if (hash_equals($rememberedLogin->getToken(), $this->hashToken($token))) {
+                $currentUser = $this->userGateway->findUserByUsername($rememberedLogin->getUsername());
 
-            $this->session->setCurrentlyLoggedInUser($currentUser);
+                $this->session->setCurrentlyLoggedInUser($currentUser);
+            }
         }
+    }
+
+    private function rememberedLoginHasNotExpired(RememberedLogin $rememberedLogin): bool
+    {
+        return $rememberedLogin->getExpiryDateTime()->getTimestamp() >= $this->clock->getDateTime()->getTimestamp();
     }
 
     public function deleteRememberedLogin()
