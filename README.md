@@ -13,7 +13,7 @@ Still to implement:
  - Password changing
  - Password reset / Forgotten password feature?
  - Password generation?
- - Two factor authentication
+ - Two factor authentication?
 
 Not in scope:
 
