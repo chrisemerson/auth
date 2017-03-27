@@ -22,7 +22,6 @@ class RememberedLoginServiceSpec extends ObjectBehavior
 {
     const TEST_SELECTOR = 'test_selector';
     const TEST_TOKEN = 'test_token';
-
     const TEST_USERNAME = 'test_remembered_username';
 
     function let(

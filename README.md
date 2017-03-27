@@ -8,11 +8,10 @@ This library was put together with the help of the following resources:
 
 Still to implement:
 
- - Remember Me functionality
  - Configurable rate limiting
  - Password strength requirements?
  - Password changing
- - Password reset?
+ - Password reset / Forgotten password feature?
  - Password generation?
 
 Not in scope:
