@@ -314,4 +314,12 @@ class RememberedLoginServiceSpec extends ObjectBehavior
 
         $this->rememberLogin($user);
     }
+
+    function it_delegates_requests_to_clean_up_expired_logins_to_gateway(
+        RememberedLoginGateway $rememberedLoginGateway
+    ) {
+        $rememberedLoginGateway->cleanupExpiredRememberedLogins()->shouldBeCalled();
+
+        $this->cleanupExpiredRememberedLogins();
+    }
 }

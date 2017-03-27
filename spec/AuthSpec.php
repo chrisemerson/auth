@@ -314,4 +314,12 @@ class AuthSpec extends ObjectBehavior
 
         $this->reAuthenticateCurrentUser(self::TEST_PASSWORD);
     }
+
+    function it_makes_a_call_to_clean_up_expired_logins_when_calling_cleanup(
+        RememberedLoginService $rememberedLoginService
+    ) {
+        $rememberedLoginService->cleanupExpiredRememberedLogins()->shouldBeCalled();
+
+        $this->cleanup();
+    }
 }
