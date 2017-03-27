@@ -64,8 +64,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
             $user,
             $clock,
             $dateTime,
-            30 * 24 * 60 * 60,
-            60 * 60
+            30 * 24 * 60 * 60
         );
     }
 
@@ -86,30 +85,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
             $user,
             $clock,
             $dateTime,
-            24 * 60 * 60,
-            60 * 60
-        );
-    }
-
-    function it_allows_the_persisted_remembered_login_grace_period_to_be_overridden(
-        RememberedLoginGateway $rememberedLoginGateway,
-        CookieGateway $cookieGateway,
-        RememberedLoginFactory $rememberedLoginFactory,
-        RememberedLogin $rememberedLogin,
-        AuthUser $user,
-        Clock $clock,
-        DateTimeImmutable $dateTime
-    ) {
-        $this->runRememberedLoginTest(
-            $rememberedLoginGateway,
-            $cookieGateway,
-            $rememberedLoginFactory,
-            $rememberedLogin,
-            $user,
-            $clock,
-            $dateTime,
-            30 * 24 * 60 * 60,
-            5
+            24 * 60 * 60
         );
     }
 
@@ -270,8 +246,7 @@ class RememberedLoginServiceSpec extends ObjectBehavior
         AuthUser $user,
         Clock $clock,
         DateTimeImmutable $dateTime,
-        int $expectedTTL,
-        int $expectedGracePeriod
+        int $expectedTTL
     ) {
         $user->getUsername()->willReturn(self::TEST_USERNAME);
 
@@ -284,10 +259,10 @@ class RememberedLoginServiceSpec extends ObjectBehavior
                 self::TEST_USERNAME,
                 Argument::type('string'),
                 Argument::type('string'),
-                Argument::that(function ($arg) use ($expectedTTL, $expectedGracePeriod) {
+                Argument::that(function ($arg) use ($expectedTTL) {
                     return
                         $arg instanceof DateTimeInterface
-                        && $arg->getTimestamp() == 1000000 + $expectedTTL + $expectedGracePeriod;
+                        && $arg->getTimestamp() == 1000000 + $expectedTTL;
                 })
             )
             ->shouldBeCalled()
@@ -308,9 +283,6 @@ class RememberedLoginServiceSpec extends ObjectBehavior
             ->shouldBeCalled();
 
         $this->setRememberedLoginTTL($expectedTTL);
-        $this->setStoredRememberedLoginGracePeriod($expectedGracePeriod);
-
-        $this->setStoredRememberedLoginGracePeriod($expectedGracePeriod);
 
         $this->rememberLogin($user);
     }
