@@ -14,9 +14,9 @@ final class AuthSession implements Session, LoggerAwareInterface
 
     const SESSION_ID_REGENERATION_INTERVAL = 300;
 
-    const SESSION_CANARY_NAME = 'cemerson.auth.canary';
-    const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson.auth.auththissession';
-    const SESSION_CURRENT_USER_NAME = 'cemerson.auth.currentuser';
+    const SESSION_CANARY_NAME = 'cemerson_auth_canary';
+    const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson_auth_auththissession';
+    const SESSION_CURRENT_USER_NAME = 'cemerson_auth_currentuser';
 
     /** @var SessionGateway */
     private $sessionGateway;
@@ -75,11 +75,17 @@ final class AuthSession implements Session, LoggerAwareInterface
         );
     }
 
-    public function onSuccessfulAuthentication(AuthUser $authenticatedUser)
+    public function setCurrentlyLoggedInUser(AuthUser $currentUser)
     {
         $this->checkSessionStarted();
 
-        $this->sessionGateway->write(self::SESSION_CURRENT_USER_NAME, $authenticatedUser->getUsername());
+        $this->sessionGateway->write(self::SESSION_CURRENT_USER_NAME, $currentUser->getUsername());
+    }
+
+    public function onSuccessfulAuthentication(AuthUser $authenticatedUser)
+    {
+        $this->setCurrentlyLoggedInUser($authenticatedUser);
+
         $this->sessionGateway->write(self::SESSION_AUTH_THIS_SESSION_NAME, 1);
 
         $this->regenerateSession();

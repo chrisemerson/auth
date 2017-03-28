@@ -14,3 +14,4 @@ extensions:
             - vendor
         blacklist_files:
             - src/Session/PHPSessionGateway.php
+            - src/Cookie/PHPCookieGateway.php
