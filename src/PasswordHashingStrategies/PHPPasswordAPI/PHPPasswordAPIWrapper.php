@@ -4,7 +4,7 @@ namespace CEmerson\Auth\PasswordHashingStrategies\PHPPasswordAPI;
 
 interface PHPPasswordAPIWrapper
 {
-    public function hash(string $password, int $algo = PASSWORD_DEFAULT, array $options = []) : string;
+    public function hash(string $password, string $algo = PASSWORD_DEFAULT, array $options = []) : string;
 
     public function verify(string $password, string $hash) : bool;
 }
