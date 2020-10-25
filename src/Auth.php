@@ -3,9 +3,7 @@
 namespace CEmerson\Auth;
 
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
-use CEmerson\Auth\Exceptions\UserAlreadyLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
-use CEmerson\Auth\RememberedLogins\RememberedLoginService;
 use CEmerson\Auth\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
@@ -21,22 +19,15 @@ final class Auth implements LoggerAwareInterface
     /** @var AuthUserGateway */
     private $userGateway;
 
-    /** @var RememberedLoginService */
-    private $rememberedLoginService;
-
     /** @var Session */
     private $session;
 
     /** @var WriteBackAuthUserGateway */
     private $writeBackAuthUserGateway = null;
 
-    public function __construct(
-        AuthUserGateway $userGateway,
-        Session $session,
-        RememberedLoginService $rememberedLoginService
-    ) {
+    public function __construct(AuthUserGateway $userGateway, Session $session)
+    {
         $this->userGateway = $userGateway;
-        $this->rememberedLoginService = $rememberedLoginService;
         $this->session = $session;
 
         $this->setLogger(new NullLogger());
@@ -49,28 +40,15 @@ final class Auth implements LoggerAwareInterface
 
     public function login(string $username, string $password, bool $rememberMe = false): bool
     {
-        if ($this->isLoggedIn()) {
-            throw new UserAlreadyLoggedIn();
-        }
-
         try {
             $user = $this->userGateway->findUserByUsername($username);
         } catch (UserNotFound $e) {
             return false;
         }
 
-        return $this->handleUserAuthentication($user, $password, $rememberMe);
-    }
-
-    private function handleUserAuthentication(AuthUser $user, string $password, bool $rememberMe): bool
-    {
         if ($this->verifyPassword($user, $password)) {
             $this->session->onSuccessfulAuthentication($user);
             $this->writeBackUser($user, $password);
-
-            if ($rememberMe) {
-                $this->rememberedLoginService->rememberLogin($user);
-            }
 
             return true;
         }
@@ -78,7 +56,7 @@ final class Auth implements LoggerAwareInterface
         return false;
     }
 
-    private function verifyPassword(AuthUser $user, string $password): bool
+    public function verifyPassword(AuthUser $user, string $password): bool
     {
         $passwordHashingStrategy = $user->getPasswordHashingStrategy();
         $passwordHash = $user->getPasswordHash();
@@ -88,16 +66,11 @@ final class Auth implements LoggerAwareInterface
 
     public function logout()
     {
-        $this->rememberedLoginService->loadRememberedLoginFromCookie();
-
         $this->session->deleteAuthSessionInfo();
-        $this->rememberedLoginService->deleteRememberedLogin();
     }
 
     public function isLoggedIn(): bool
     {
-        $this->rememberedLoginService->loadRememberedLoginFromCookie();
-
         return $this->session->userIsLoggedIn();
     }
 
@@ -114,16 +87,7 @@ final class Auth implements LoggerAwareInterface
 
     public function hasAuthenticatedThisSession(): bool
     {
-        $this->rememberedLoginService->loadRememberedLoginFromCookie();
-
         return $this->session->userHasAuthenticatedThisSession();
-    }
-
-    public function reAuthenticateCurrentUser(string $password): bool
-    {
-        $currentUser = $this->getCurrentUser();
-
-        return $this->handleUserAuthentication($currentUser, $password, true);
     }
 
     private function writeBackUser(AuthUser $user, string $password)
@@ -133,10 +97,5 @@ final class Auth implements LoggerAwareInterface
             $newPasswordHash = $passwordHashingStrategy->hashPassword($password);
             $this->writeBackAuthUserGateway->saveUser($user, $newPasswordHash);
         }
-    }
-
-    public function cleanup()
-    {
-        $this->rememberedLoginService->cleanupExpiredRememberedLogins();
     }
 }

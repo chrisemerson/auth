@@ -14,8 +14,6 @@ interface Session
 
     public function userHasAuthenticatedThisSession(): bool;
 
-    public function setCurrentlyLoggedInUser(AuthUser $currentUser);
-
     public function onSuccessfulAuthentication(AuthUser $authenticatedUser);
 
     public function deleteAuthSessionInfo();

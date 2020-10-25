@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth\PasswordHashingStrategies;
 
-final class SaltedPasswordHashingStrategyDecorator implements PasswordHashingStrategy
+class SaltedPasswordHashingStrategyDecorator implements PasswordHashingStrategy
 {
     /** @var PasswordHashingStrategy */
     private $passwordHashingStrategy;
