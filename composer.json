@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": "^7.0 | ^8.0",
+        "php": "^7.3 | ^8.0",
         "cemerson/clock": "^1.2",
         "paragonie/password_lock": "^3.0",
         "psr/log": "^1.1"
