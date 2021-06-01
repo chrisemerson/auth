@@ -9,16 +9,15 @@
         }
     ],
     "require": {
-        "php": "^7.0",
-        "roave/security-advisories": "dev-master@dev",
+        "php": "^7.0 | ^8.0",
+        "cemerson/clock": "^1.2",
         "paragonie/password_lock": "^3.0",
-        "psr/log": "^1.0",
-        "cemerson/clock": "^1.1"
+        "psr/log": "^1.1"
     },
     "require-dev": {
-        "phpspec/phpspec": "^3.0",
-        "squizlabs/php_codesniffer": "^2.6",
-        "henrikbjorn/phpspec-code-coverage": "^3.0"
+        "phpspec/phpspec": "^7.0",
+        "roave/security-advisories": "dev-master@dev",
+        "squizlabs/php_codesniffer": "^3.6"
     },
     "autoload": {
         "psr-4": {
@@ -32,6 +31,7 @@
     },
     "minimum-stability": "stable",
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "sort-packages": true
     }
 }

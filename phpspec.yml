@@ -2,16 +2,3 @@ suites:
     default:
         namespace: CEmerson\Auth\
         psr4_prefix: CEmerson\Auth\
-extensions:
-    PhpSpecCodeCoverage\CodeCoverageExtension:
-        format:
-            - html
-        output:
-            html: coverage
-        blacklist:
-            - .phpspec
-            - bin
-            - vendor
-        blacklist_files:
-            - src/Session/PHPSessionGateway.php
-            - src/Cookie/PHPCookieGateway.php

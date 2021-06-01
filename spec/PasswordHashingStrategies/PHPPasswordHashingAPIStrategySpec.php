@@ -16,7 +16,7 @@ class PHPPasswordHashingAPIStrategySpec extends ObjectBehavior
     function it_delegates_calls_to_hash_to_wrapper_class(PHPPasswordAPIWrapper $PHPPasswordAPIWrapper)
     {
         $PHPPasswordAPIWrapper
-            ->hash('test_password', Argument::type('int'), Argument::type('array'))
+            ->hash('test_password', Argument::type('string'), Argument::type('array'))
             ->shouldBeCalled()
             ->willReturn('test_hash');
 
@@ -46,11 +46,11 @@ class PHPPasswordHashingAPIStrategySpec extends ObjectBehavior
     function it_lets_you_set_a_different_algorithm(PHPPasswordAPIWrapper $PHPPasswordAPIWrapper)
     {
         $PHPPasswordAPIWrapper
-            ->hash('test_password', 6, Argument::type('array'))
+            ->hash('test_password', "6", Argument::type('array'))
             ->shouldBeCalled()
             ->willReturn('test_hash');
 
-        $this->setAlgorithm(6);
+        $this->setAlgorithm("6");
 
         $this->hashPassword('test_password')->shouldReturn('test_hash');
     }
@@ -58,7 +58,7 @@ class PHPPasswordHashingAPIStrategySpec extends ObjectBehavior
     function it_lets_you_set_a_different_cost(PHPPasswordAPIWrapper $PHPPasswordAPIWrapper)
     {
         $PHPPasswordAPIWrapper
-            ->hash('test_password', Argument::type('int'), Argument::withEntry('cost', 8))
+            ->hash('test_password', Argument::type('string'), Argument::withEntry('cost', 8))
             ->shouldBeCalled()
             ->willReturn('test_hash');
 

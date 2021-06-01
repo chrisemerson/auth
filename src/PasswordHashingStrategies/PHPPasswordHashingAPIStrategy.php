@@ -9,7 +9,7 @@ final class PHPPasswordHashingAPIStrategy implements PasswordHashingStrategy
     /** @var PHPPasswordAPIWrapper */
     private $PHPPasswordAPIWrapper;
 
-    /** @var int */
+    /** @var string */
     private $algorithm = PASSWORD_DEFAULT;
 
     /** @var array */
@@ -20,7 +20,7 @@ final class PHPPasswordHashingAPIStrategy implements PasswordHashingStrategy
         $this->PHPPasswordAPIWrapper = $PHPPasswordAPIWrapper;
     }
 
-    public function setAlgorithm(int $algorithm)
+    public function setAlgorithm(string $algorithm)
     {
         $this->algorithm = $algorithm;
     }

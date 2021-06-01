@@ -18,7 +18,7 @@ trait PasswordHashingStrategyTestTrait
         $this->verifyPassword('wrong_password', $passwordHash)->shouldReturn(false);
     }
 
-    public function getMatchers()
+    public function getMatchers(): array
     {
         return [
             'returnCI' => function ($subject, $value) {
