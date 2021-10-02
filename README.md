@@ -1,6 +1,6 @@
 # Auth
 
-A framework & datastorage independent authentication library for PHP.
+A framework & data storage independent authentication library for PHP.
 
 ## Authentication vs Authorisation
 
@@ -16,8 +16,6 @@ Installation is via [Composer](https://getcomposer.org/):
 $ composer require cemerson/auth
 ```
 
-or add it by hand to your `composer.json` file.
-
 ## How it Works
 
 When your user attempts to log in, you pass the details to the package to verify the username and password, which then sets a cookie on your user's machine that expires when the browser session expires. Optionally, you can enable the "remember me" functionality to set a longer lasting cookie which will persist the login.
@@ -26,11 +24,11 @@ The Auth package allows you to choose from a number of different hashing strateg
 
 ## Configuration
 
-As this package does not connect directly to your datastorage, you will need to provide some concrete implementations so the authentication mechanisms can access the user object and same session information into the database.
+As this package does not connect directly to your data storage, you will need to provide some concrete implementations so the authentication mechanisms can access the user object and save session information into the database.
 
 ### AuthUserGateway
 
-The `AuthUserGateway` connects `Auth` to your datastorage, allowing it to find the user that is attempting to login. You must implement this interface in your application; this would normally be in your user repository, or similar.
+The `AuthUserGateway` connects `Auth` to your data storage, allowing it to find the user that is attempting to login. You must implement this interface in your application; this would normally be in your user repository, or similar.
 
 The interface requires only one function:
 
@@ -92,7 +90,7 @@ Logs the current user out, and resets the cookie.
 
 ## Hashing Strategies
 
-Each user will have a `PasswordHashingStrategy` that controls how their password is hashed before it is stored in your datastorage layer.
+Each user will have a `PasswordHashingStrategy` that controls how their password is hashed before it is stored in your data storage layer.
 
 The strategy has two functions:
 
@@ -104,15 +102,15 @@ this returns a hashed version of the password, using the strategy
 
 This checks that the given password matches the hash.
 
+**Note:** If you are creating your own hashing strategy, the `verifyPassword` function should be made safe against timing attacks. The provided strategies already do this.
+
 ### Which strategy
 
-The package provides a number of implementations you can use.  If you are starting fresh, we suggest you use either the `PasswordLockPasswordHashingStrategy` or the `PHPPasswordHashingAPIStrategy`.
+The package provides a number of implementations you can use.  If you are starting fresh, we suggest you use the `PasswordLockPasswordHashingStrategy`.
 
-Using the `PHPPasswordHashingAPIStrategy` is straightforward:
+This strategy wraps the Paragon IE [password lock](https://github.com/paragonie/password_lock) package, and is based on the advice found at https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
 
-`$strategy = new PHPPasswordHashingAPIStrategy(new PHPPasswordAPIWrapperImplementation());`
-
-If you want to use the `PasswordLockPasswordHashingStrategy`, then you will need to generate and store a key. You *must not* store this key in the same datastore that you keep the hashed passwords.
+To use the `PasswordLockPasswordHashingStrategy`, then you will need to generate and store a key. You *must not* store this key in the same datastore that you keep the hashed passwords.
 
 `$key = Defuse\Crypto\Key::createNewRandomKey();`
 
@@ -128,7 +126,7 @@ The `Key` class provides some functions to help you store this key:
 
 ### Migrating Strategies
 
-Need some info here!
+Detail coming soon.
 
 ## Session
 
