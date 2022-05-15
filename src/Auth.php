@@ -2,88 +2,70 @@
 
 namespace CEmerson\Auth;
 
+use CEmerson\Auth\AuthContexts\AuthContext;
+use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
-use CEmerson\Auth\Exceptions\UserAlreadyLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
-use CEmerson\Auth\RememberedLogins\RememberedLoginService;
-use CEmerson\Auth\Session\Session;
-use CEmerson\Auth\Users\AuthUser;
-use CEmerson\Auth\Users\AuthUserGateway;
-use CEmerson\Auth\Users\WriteBackAuthUserGateway;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
+use CEmerson\Auth\Providers\AuthenticationParameters;
+use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
+use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationFailedResponse;
+use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationResponse;
+use CEmerson\Auth\Providers\AuthenticationResponse\UserNotFoundResponse;
+use CEmerson\Auth\Providers\AuthProvider;
+use Psr\Log\LoggerInterface;
 
-final class Auth implements LoggerAwareInterface
+final class Auth
 {
-    use LoggerAwareTrait;
-
-    /** @var AuthUserGateway */
-    private $userGateway;
-
-    /** @var RememberedLoginService */
-    private $rememberedLoginService;
-
-    /** @var Session */
-    private $session;
-
-    /** @var WriteBackAuthUserGateway */
-    private $writeBackAuthUserGateway = null;
+    private AuthContext $authContext;
+    private LoggerInterface $logger;
+    private AuthProvider $provider;
 
     public function __construct(
-        AuthUserGateway $userGateway,
-        Session $session,
-        RememberedLoginService $rememberedLoginService
+        AuthContext $authContext,
+        LoggerInterface $logger,
+        AuthProvider $authProvider
     ) {
-        $this->userGateway = $userGateway;
-        $this->rememberedLoginService = $rememberedLoginService;
-        $this->session = $session;
+        $this->authContext = $authContext;
+        $this->logger = $logger;
 
-        $this->setLogger(new NullLogger());
+        $this->provider = $authProvider;
     }
 
-    public function setWriteBackAuthUserGateway(WriteBackAuthUserGateway $writeBackAuthUserGateway)
+    public function attemptAuthentication(AuthenticationParameters $authenticationParameters): AuthenticationResponse
     {
-        $this->writeBackAuthUserGateway = $writeBackAuthUserGateway;
-    }
+        //Default if no providers are passed - user not found
+        $authResponse = new UserNotFoundResponse();
 
-    public function login(string $username, string $password, bool $rememberMe = false): bool
-    {
-        if ($this->isLoggedIn()) {
-            throw new UserAlreadyLoggedIn();
+        $this->logger->info("Attempting authentication with provider {provider}", [
+            'provider' => get_class($this->provider)
+        ]);
+
+        $authResponse = $this->provider->attemptAuthentication($authenticationParameters);
+
+        if ($authResponse instanceof UserNotFoundResponse) {
+            $this->logger->info("Authentication result - User Not Found. Skipping to next provider.");
+        } elseif ($authResponse instanceof AuthenticationFailedResponse) {
+            $this->logger->info("Authentication failed - {response}", [
+                'response' => get_class($authResponse)
+            ]);
+
+            throw new AuthenticationFailed($authResponse);
+        } else {
+            $this->logger->info("Authentication response - {response}", [
+                'response' => get_class($authResponse)
+            ]);
+
+            return $authResponse;
         }
 
-        try {
-            $user = $this->userGateway->findUserByUsername($username);
-        } catch (UserNotFound $e) {
-            return false;
-        }
+        $this->logger->info("User was not found after trying all providers.");
 
-        return $this->handleUserAuthentication($user, $password, $rememberMe);
+        throw new UserNotFound($authResponse);
     }
 
-    private function handleUserAuthentication(AuthUser $user, string $password, bool $rememberMe): bool
+    public function respondToChallenge(AuthenticationChallengeResponse $challengeResponse): AuthenticationResponse
     {
-        if ($this->verifyPassword($user, $password)) {
-            $this->session->onSuccessfulAuthentication($user);
-            $this->writeBackUser($user, $password);
-
-            if ($rememberMe) {
-                $this->rememberedLoginService->rememberLogin($user);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private function verifyPassword(AuthUser $user, string $password): bool
-    {
-        $passwordHashingStrategy = $user->getPasswordHashingStrategy();
-        $passwordHash = $user->getPasswordHash();
-
-        return $passwordHashingStrategy->verifyPassword($password, $passwordHash);
+        return $this->provider->respondToAuthenticationChallenge($challengeResponse);
     }
 
     public function logout()
@@ -101,15 +83,13 @@ final class Auth implements LoggerAwareInterface
         return $this->session->userIsLoggedIn();
     }
 
-    public function getCurrentUser(): AuthUser
+    public function getCurrentUser(): string
     {
         if (!$this->isLoggedIn()) {
             throw new NoUserLoggedIn();
         }
 
-        return $this->userGateway->findUserByUsername(
-            $this->session->getLoggedInUsername()
-        );
+        return $this->session->getLoggedInUsername();
     }
 
     public function hasAuthenticatedThisSession(): bool
@@ -119,20 +99,11 @@ final class Auth implements LoggerAwareInterface
         return $this->session->userHasAuthenticatedThisSession();
     }
 
-    public function reAuthenticateCurrentUser(string $password): bool
+    public function reAuthenticateCurrentUser(AuthenticationParameters $authenticationParameters): AuthenticationResponse
     {
         $currentUser = $this->getCurrentUser();
 
         return $this->handleUserAuthentication($currentUser, $password, true);
-    }
-
-    private function writeBackUser(AuthUser $user, string $password)
-    {
-        if (!is_null($this->writeBackAuthUserGateway)) {
-            $passwordHashingStrategy = $this->writeBackAuthUserGateway->getPasswordHashingStrategy();
-            $newPasswordHash = $passwordHashingStrategy->hashPassword($password);
-            $this->writeBackAuthUserGateway->saveUser($user, $newPasswordHash);
-        }
     }
 
     public function cleanup()

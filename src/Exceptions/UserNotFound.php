@@ -2,6 +2,6 @@
 
 namespace CEmerson\Auth\Exceptions;
 
-final class UserNotFound extends AuthException
+final class UserNotFound extends AuthenticationFailed
 {
 }

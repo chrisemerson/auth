@@ -1,12 +1,3 @@
-### IDE Files ###
-/.idea/
-
-### Composer lock file - Don't commit for libraries ###
 /composer.lock
-
-### Dependencies ###
-/bin/
-/vendor/
-
-### Coverage report ###
 /coverage/
+/vendor/
