@@ -9,7 +9,9 @@ use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\Authe
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationDetailsIncorrectResponse;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationResponse;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\PasswordResetRequired\PasswordResetRequiredChallenge;
+use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationSucceededResponse;
 use CEmerson\Auth\Providers\AuthenticationResponse\UserNotFoundResponse;
+use Exception;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -105,6 +107,26 @@ class AwsCognitoAuthProvider implements AuthProvider
                 case 'NEW_PASSWORD_REQUIRED':
                     $username = $cognitoResponse->get('ChallengeParameters')['USER_ID_FOR_SRP'];
                     return new PasswordResetRequiredChallenge($cognitoResponse->get('Session'), $username);
+            }
+        }
+
+        if ($cognitoResponse->hasKey('AuthenticationResult')) {
+            $authenticationResult = $cognitoResponse->get('AuthenticationResult');
+
+            if (isset($authenticationResult['AccessToken'])
+                && isset($authenticationResult['IdToken'])
+                && isset($authenticationResult['RefreshToken'])
+            ) {
+                try {
+                    //Validate tokens here
+                    return new AuthenticationSucceededResponse(
+                        $authenticationResult['AccessToken'],
+                        $authenticationResult['IdToken'],
+                        $authenticationResult['RefreshToken']
+                    );
+                } catch (Exception $e) {
+                    //return something here, gone wrong
+                }
             }
         }
 
