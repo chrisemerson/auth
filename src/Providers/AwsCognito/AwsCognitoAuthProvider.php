@@ -88,4 +88,9 @@ class AwsCognitoAuthProvider implements AuthProvider
     public function registerUser(string $username, string $password)
     {
     }
+
+    public function logout()
+    {
+        // TODO: Implement logout() method.
+    }
 }

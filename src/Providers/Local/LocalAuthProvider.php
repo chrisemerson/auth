@@ -36,4 +36,9 @@ class LocalAuthProvider implements AuthProvider
     {
         // TODO: Implement registerUser() method.
     }
+
+    public function logout()
+    {
+        // TODO: Implement logout() method.
+    }
 }

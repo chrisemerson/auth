@@ -17,7 +17,13 @@ $config = require __DIR__ . "/config.php";
 
 $authContext = new class implements AuthContext
 {
+    public function deleteSessionInfo()
+    {
+    }
 
+    public function deleteRememberedLogin()
+    {
+    }
 };
 
 $logger = new class extends AbstractLogger implements LoggerInterface {

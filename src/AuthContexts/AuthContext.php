@@ -6,4 +6,7 @@ namespace CEmerson\Auth\AuthContexts;
 
 interface AuthContext
 {
+    public function deleteSessionInfo();
+
+    public function deleteRememberedLogin();
 }

@@ -67,10 +67,9 @@ final class Auth
 
     public function logout()
     {
-        $this->rememberedLoginService->loadRememberedLoginFromCookie();
-
-        $this->session->deleteAuthSessionInfo();
-        $this->rememberedLoginService->deleteRememberedLogin();
+        $this->provider->logout();
+        $this->authContext->deleteSessionInfo();
+        $this->authContext->deleteRememberedLogin();
     }
 
     public function isLoggedIn(): bool

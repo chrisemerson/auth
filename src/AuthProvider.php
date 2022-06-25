@@ -22,4 +22,6 @@ interface AuthProvider
     public function forgotPassword(string $username);
 
     public function registerUser(string $username, string $password);
+
+    public function logout();
 }

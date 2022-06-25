@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/vendor/autoload.php";
 
+use CEmerson\Auth\Auth;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
@@ -9,6 +10,7 @@ use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\MFARequired\MFARequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
 
+/** @var Auth $auth */
 $auth = require __DIR__ . "/auth.php";
 
 /* Auth possibilities:
