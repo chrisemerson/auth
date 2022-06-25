@@ -1,10 +1,10 @@
 <?php
 
-namespace CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\PasswordResetRequired;
+namespace CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired;
 
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
 
-class PasswordResetRequiredChallengeResponse implements AuthenticationChallengeResponse
+class NewPasswordRequiredChallengeResponse implements AuthenticationChallengeResponse
 {
     private string $challengeId;
     private string $username;

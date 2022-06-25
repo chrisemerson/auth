@@ -8,8 +8,8 @@ use Aws\Result;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationDetailsIncorrectResponse;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationResponse;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\PasswordResetRequired\PasswordResetRequiredChallenge;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationSucceededResponse;
+use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
 use CEmerson\Auth\Providers\AuthenticationResponse\UserNotFoundResponse;
 use Exception;
 use Fig\Http\Message\StatusCodeInterface;
@@ -106,7 +106,7 @@ class AwsCognitoAuthProvider implements AuthProvider
             switch ($cognitoResponse->get('ChallengeName')) {
                 case 'NEW_PASSWORD_REQUIRED':
                     $username = $cognitoResponse->get('ChallengeParameters')['USER_ID_FOR_SRP'];
-                    return new PasswordResetRequiredChallenge($cognitoResponse->get('Session'), $username);
+                    return new NewPasswordRequiredChallenge($cognitoResponse->get('Session'), $username);
             }
         }
 
@@ -153,7 +153,7 @@ class AwsCognitoAuthProvider implements AuthProvider
 
     public function changePassword(string $username, string $oldPassword, string $newPassword): bool
     {
-
+        return false;
     }
 
     public function forgotPassword(string $username)

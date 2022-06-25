@@ -4,17 +4,21 @@ require_once __DIR__ . "/vendor/autoload.php";
 
 use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use CEmerson\Auth\Auth;
-use CEmerson\Auth\AuthContexts\NativePhpAuthContext;
+use CEmerson\Auth\AuthContexts\AuthContext;
+use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Providers\AuthenticationParameters;
 use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallenge;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\PasswordResetRequired\PasswordResetRequiredChallenge;
+use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognitoAuthProvider;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 
 $config = require __DIR__ . "/config.php";
 
-$authContext = new NativePHPAuthContext();
+$authContext = new class implements AuthContext
+{
+
+};
 
 $logger = new class extends AbstractLogger implements LoggerInterface {
     public function log($level, $message, array $context = array())
@@ -42,6 +46,17 @@ $provider = new AwsCognitoAuthProvider(
 
 $auth = new Auth($authContext, $logger, $provider);
 
+/* Auth possibilities:
+
+ - Username / password incorrect
+ - MFA required
+ - MFA incorrect
+ - New password required
+ - Too many tries / locked out
+
+ - Remembered login (save in file)
+ - If file exists, authenticate with it */
+
 $username = readline("Username: ");
 $password = readline("Password: ");
 
@@ -51,7 +66,8 @@ try {
     $response = $auth->attemptAuthentication($params);
 
     while ($response instanceof AuthenticationChallenge) {
-        if ($response instanceof PasswordResetRequiredChallenge) {
+        echo "New password is required!" . PHP_EOL;
+        if ($response instanceof NewPasswordRequiredChallenge) {
             $challengeResponse = readline("New password required: ");
         }
 
@@ -59,6 +75,6 @@ try {
     }
 
     print_r($response);
-} catch (\CEmerson\Auth\Exceptions\AuthenticationFailed $ex) {
+} catch (AuthenticationFailed $ex) {
     print_r(get_class($ex->getAuthenticationFailedResponse()));
 }
