@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CEmerson\Auth\Providers\AwsCognito\AuthChallenge\MFARequired;
+namespace CEmerson\Auth\Providers\AwsCognito\AuthChallenges\MFARequired;
 
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 
 class MFARequiredChallengeResponse implements AuthChallengeResponse
 {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace CEmerson\Auth;
 
 use CEmerson\Auth\AuthParameters;
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallenge;
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponse\AuthResponse;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthResponse;
 
 interface AuthProvider
 {

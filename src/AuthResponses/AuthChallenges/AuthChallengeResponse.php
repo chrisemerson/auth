@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CEmerson\Auth\AuthResponse\AuthChallenge;
+namespace CEmerson\Auth\AuthResponses\AuthChallenges;
 
 interface AuthChallengeResponse
 {

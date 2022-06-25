@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace CEmerson\Auth\Providers\AwsCognito\AuthChallenge\NewPasswordRequired;
+namespace CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired;
 
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallenge;
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 
 class NewPasswordRequiredChallenge implements AuthChallenge
 {

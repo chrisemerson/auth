@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CEmerson\Auth\Exceptions;
 
-use CEmerson\Auth\AuthResponse\AuthFailedResponse;
+use CEmerson\Auth\AuthResponses\AuthFailedResponse;
 use Throwable;
 
 class AuthenticationFailed extends AuthException

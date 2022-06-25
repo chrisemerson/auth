@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CEmerson\Auth\AuthResponse\AuthChallenge;
+namespace CEmerson\Auth\AuthResponses\AuthChallenges;
 
-use CEmerson\Auth\AuthResponse\AuthResponse;
+use CEmerson\Auth\AuthResponses\AuthResponse;
 use JsonSerializable;
 
 interface AuthChallenge extends AuthResponse, JsonSerializable

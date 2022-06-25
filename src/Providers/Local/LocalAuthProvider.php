@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace CEmerson\Auth\Providers\Local;
 
 use CEmerson\Auth\AuthParameters;
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponse\AuthResponse;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthResponse;
 use CEmerson\Auth\AuthProvider;
 
 class LocalAuthProvider implements AuthProvider

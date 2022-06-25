@@ -8,10 +8,10 @@ use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
-use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponse\AuthFailedResponse;
-use CEmerson\Auth\AuthResponse\AuthResponse;
-use CEmerson\Auth\AuthResponse\UserNotFoundResponse;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthFailedResponse;
+use CEmerson\Auth\AuthResponses\AuthResponse;
+use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
 use Psr\Log\LoggerInterface;
 
 final class Auth
