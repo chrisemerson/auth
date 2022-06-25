@@ -9,6 +9,7 @@ use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallenge;
 use CEmerson\Auth\AuthResponse\AuthSucceededResponse;
+use CEmerson\Auth\Providers\AwsCognito\AuthChallenge\MFARequired\MFARequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthProvider;
 use Psr\Log\AbstractLogger;
@@ -68,8 +69,11 @@ try {
 
     while ($response instanceof AuthChallenge) {
         echo "New password is required!" . PHP_EOL;
+
         if ($response instanceof NewPasswordRequiredChallenge) {
             $challengeResponse = readline("New password required: ");
+        } else if ($response instanceof MFARequiredChallenge) {
+            $challengeResponse = readline("Please enter MFA code: ");
         }
 
         $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));

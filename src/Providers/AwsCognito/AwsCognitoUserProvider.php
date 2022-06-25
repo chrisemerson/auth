@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace CEmerson\Auth\Providers\AwsCognito;
 
@@ -9,7 +9,7 @@ class AwsCognitoUserProvider implements UserProvider
 {
     private $tokenProvider;
 
-    public function __construct (TokenProvider $tokenProvider)
+    public function __construct(TokenProvider $tokenProvider)
     {
         $this->tokenProvider = $tokenProvider;
     }

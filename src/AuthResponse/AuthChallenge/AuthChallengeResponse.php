@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace CEmerson\Auth\AuthResponse\AuthChallenge;
 
@@ -10,7 +10,7 @@ interface AuthChallengeResponse
 
     public function getUsername(): string;
 
-    public function getChallengeResponses(): array;
+    public function getChallengeParameters(): array;
 
     public function isSecretHashRequired(): bool;
 }

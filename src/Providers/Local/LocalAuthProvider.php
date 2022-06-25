@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace CEmerson\Auth\Providers\Local;
 
@@ -14,7 +14,8 @@ class LocalAuthProvider implements AuthProvider
         // TODO: Implement attemptAuthentication() method.
     }
 
-    public function respondToAuthenticationChallenge(AuthChallengeResponse $authenticationChallengeResponse
+    public function respondToAuthenticationChallenge(
+        AuthChallengeResponse $authenticationChallengeResponse
     ): AuthResponse {
         // TODO: Implement respondToAuthenticationChallenge() method.
     }

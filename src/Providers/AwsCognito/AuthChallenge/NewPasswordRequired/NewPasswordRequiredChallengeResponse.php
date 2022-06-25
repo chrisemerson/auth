@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace CEmerson\Auth\Providers\AwsCognito\AuthChallenge\NewPasswordRequired;
 
@@ -32,7 +32,7 @@ class NewPasswordRequiredChallengeResponse implements AuthChallengeResponse
         return $this->username;
     }
 
-    public function getChallengeResponses(): array
+    public function getChallengeParameters(): array
     {
         return [
             'NEW_PASSWORD' => $this->newPassword,

@@ -23,4 +23,6 @@
 
         <exclude-pattern>./src/*</exclude-pattern>
     </rule>
+
+    <rule ref="Generic.PHP.RequireStrictTypes" />
 </ruleset>

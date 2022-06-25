@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace CEmerson\Auth\Providers\AwsCognito;
 
@@ -64,7 +64,7 @@ class AwsCognitoAuthProvider implements AuthProvider
         AuthChallengeResponse $authenticationChallengeResponse
     ): AuthResponse {
         try {
-            $challengeResponses = $authenticationChallengeResponse->getChallengeResponses();
+            $challengeResponses = $authenticationChallengeResponse->getChallengeParameters();
 
             if ($authenticationChallengeResponse->isSecretHashRequired()) {
                 $challengeResponses['SECRET_HASH'] = $this->hash(
@@ -160,12 +160,10 @@ class AwsCognitoAuthProvider implements AuthProvider
 
     public function forgotPassword(string $username)
     {
-
     }
 
     public function registerUser(string $username, string $password)
     {
-
     }
 
     private function hash(string $string)
