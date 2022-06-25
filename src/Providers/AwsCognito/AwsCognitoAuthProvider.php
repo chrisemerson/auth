@@ -4,61 +4,49 @@ declare(strict_types=1);
 
 namespace CEmerson\Auth\Providers\AwsCognito;
 
-use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
-use Aws\Result;
 use CEmerson\Auth\AuthParameters;
-use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
-use CEmerson\Auth\AuthResponses\AuthResponse;
-use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
-use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
 use CEmerson\Auth\AuthProvider;
-use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
-use Exception;
-use Fig\Http\Message\StatusCodeInterface;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthResponse;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class AwsCognitoAuthProvider implements AuthProvider
 {
-    private CognitoIdentityProviderClient $awsCognitoClient;
-    private string $userPoolId;
-    private string $clientId;
-    private string $clientSecret;
+    private AwsCognitoConfiguration $awsCognitoConfiguration;
+    private AwsCognitoResponseParser $awsCognitoResponseParser;
     private LoggerInterface $logger;
 
     public function __construct(
-        CognitoIdentityProviderClient $awsCognitoClient,
-        string $userPoolId,
-        string $clientId,
-        string $clientSecret,
+        AwsCognitoConfiguration $awsCognitoConfiguration,
+        AwsCognitoResponseParser $awsCognitoResponseParser,
         LoggerInterface $logger = null
     ) {
-        $this->awsCognitoClient = $awsCognitoClient;
-        $this->userPoolId = $userPoolId;
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
+        $this->awsCognitoConfiguration = $awsCognitoConfiguration;
+        $this->awsCognitoResponseParser = $awsCognitoResponseParser;
         $this->logger = $logger ?? new NullLogger();
     }
 
     public function attemptAuthentication(AuthParameters $authParameters): AuthResponse
     {
         try {
-            return $this->parseCognitoResponse(
-                $this->awsCognitoClient->adminInitiateAuth([
+            return $this->awsCognitoResponseParser->parseCognitoResponse(
+                $this->awsCognitoConfiguration->getAwsCognitoClient()->adminInitiateAuth([
                     'AuthFlow' => 'ADMIN_NO_SRP_AUTH',
                     'AuthParameters' => [
                         'USERNAME' => $authParameters->getUsername(),
                         'PASSWORD' => $authParameters->getPassword(),
-                        'SECRET_HASH' => $this->hash($authParameters->getUsername() . $this->clientId)
+                        'SECRET_HASH' => $this->awsCognitoConfiguration->hash(
+                            $authParameters->getUsername() . $this->awsCognitoConfiguration->getClientId(),
+                        )
                     ],
-                    'ClientId' => $this->clientId,
-                    'UserPoolId' => $this->userPoolId
+                    'ClientId' => $this->awsCognitoConfiguration->getClientId(),
+                    'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
                 ])
             );
         } catch (CognitoIdentityProviderException $ex) {
-            return $this->parseCognitoException($ex);
+            return $this->awsCognitoResponseParser->parseCognitoException($ex);
         }
     }
 
@@ -69,91 +57,23 @@ class AwsCognitoAuthProvider implements AuthProvider
             $challengeResponses = $authenticationChallengeResponse->getChallengeParameters();
 
             if ($authenticationChallengeResponse->isSecretHashRequired()) {
-                $challengeResponses['SECRET_HASH'] = $this->hash(
+                $challengeResponses['SECRET_HASH'] = $this->awsCognitoConfiguration->hash(
                     $authenticationChallengeResponse->getUsername()
-                    . $this->clientId
+                    . $this->awsCognitoConfiguration->getClientId(),
                 );
             }
 
-            return $this->parseCognitoResponse(
+            return $this->awsCognitoResponseParser->parseCognitoResponse(
                 $this->awsCognitoClient->respondToAuthChallenge([
                     'ChallengeName' => $authenticationChallengeResponse->getChallengeName(),
                     'Session' => $authenticationChallengeResponse->getChallengeId(),
                     'ChallengeResponses' => $challengeResponses,
-                    'ClientId' => $this->clientId
+                    'ClientId' => $this->awsCognitoConfiguration->getClientId()
                 ])
             );
         } catch (CognitoIdentityProviderException $ex) {
-            return $this->parseCognitoException($ex);
+            return $this->awsCognitoResponseParser->parseCognitoException($ex);
         }
-    }
-
-    private function parseCognitoResponse(Result $cognitoResponse): AuthResponse
-    {
-        $this->logger->debug('Cognito Response', [
-            'response' => $cognitoResponse
-        ]);
-
-        if ($cognitoResponse->hasKey('ChallengeName')) {
-            // Other possible values:
-
-            // SMS_MFA
-            // SOFTWARE_TOKEN_MFA
-            // SELECT_MFA_TYPE
-            // MFA_SETUP
-            // PASSWORD_VERIFIER
-            // CUSTOM_CHALLENGE
-            // DEVICE_SRP_AUTH
-            // DEVICE_PASSWORD_VERIFIER
-            // ADMIN_NO_SRP_AUTH
-
-            switch ($cognitoResponse->get('ChallengeName')) {
-                case 'NEW_PASSWORD_REQUIRED':
-                    $username = $cognitoResponse->get('ChallengeParameters')['USER_ID_FOR_SRP'];
-                    return new NewPasswordRequiredChallenge($cognitoResponse->get('Session'), $username);
-            }
-        }
-
-        if ($cognitoResponse->hasKey('AuthenticationResult')) {
-            $authenticationResult = $cognitoResponse->get('AuthenticationResult');
-
-            if (
-                isset($authenticationResult['AccessToken'])
-                && isset($authenticationResult['IdToken'])
-                && isset($authenticationResult['RefreshToken'])
-            ) {
-                try {
-                    //Validate tokens here
-                    return new AuthSucceededResponse(
-                        $authenticationResult['AccessToken'],
-                        $authenticationResult['IdToken'],
-                        $authenticationResult['RefreshToken']
-                    );
-                } catch (Exception $e) {
-                    //return something here, gone wrong
-                }
-            }
-        }
-
-        return new UserNotFoundResponse();
-    }
-
-    private function parseCognitoException(CognitoIdentityProviderException $ex): AuthResponse
-    {
-        if ($ex->getResponse()->getStatusCode() === StatusCodeInterface::STATUS_BAD_REQUEST) {
-            $ex->getResponse()->getBody()->rewind();
-            $response = json_decode($ex->getResponse()->getBody()->getContents());
-
-            print_r($response);
-
-
-            switch ($response->__type) {
-                case 'NotAuthorizedException':
-                    return new AuthDetailsIncorrectResponse();
-            }
-        }
-
-        return new AuthDetailsIncorrectResponse();
     }
 
     public function changePassword(string $username, string $oldPassword, string $newPassword): bool
@@ -167,17 +87,5 @@ class AwsCognitoAuthProvider implements AuthProvider
 
     public function registerUser(string $username, string $password)
     {
-    }
-
-    private function hash(string $string)
-    {
-        return base64_encode(
-            hash_hmac(
-                'sha256',
-                $string,
-                $this->clientSecret,
-                true
-            )
-        );
     }
 }
