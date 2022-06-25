@@ -2,58 +2,14 @@
 
 require_once __DIR__ . "/vendor/autoload.php";
 
-use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
-use CEmerson\Auth\Auth;
-use CEmerson\Auth\AuthContexts\AuthContext;
-use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
+use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\MFARequired\MFARequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
-use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthProvider;
-use CEmerson\Auth\Providers\AwsCognito\AwsCognitoConfiguration;
-use CEmerson\Auth\Providers\AwsCognito\AwsCognitoResponseParser;
-use Psr\Log\AbstractLogger;
-use Psr\Log\LoggerInterface;
 
-$config = require __DIR__ . "/config.php";
-
-$authContext = new class implements AuthContext
-{
-
-};
-
-$logger = new class extends AbstractLogger implements LoggerInterface {
-    public function log($level, $message, array $context = array())
-    {
-        echo "[" . strtoupper($level) . "]: " . $message . PHP_EOL;
-        print_r($context);
-        echo PHP_EOL . PHP_EOL;
-    }
-};
-
-$cognitoConfig = new AwsCognitoConfiguration(
-    new CognitoIdentityProviderClient([
-        'region' => 'eu-west-1',
-        'version' => '2016-04-18',
-        'credentials' => [
-            'key' => $config['access_key'],
-            'secret' => $config['secret_key'],
-        ]
-    ]),
-    $config['user_pool_id'],
-    $config['client_id'],
-    $config['client_secret']
-);
-
-$provider = new AwsCognitoAuthProvider(
-    $cognitoConfig,
-    new AwsCognitoResponseParser($logger),
-    $logger
-);
-
-$auth = new Auth($authContext, $logger, $provider);
+$auth = require __DIR__ . "/auth.php";
 
 /* Auth possibilities:
 
