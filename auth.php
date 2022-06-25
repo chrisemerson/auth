@@ -12,8 +12,10 @@ use CEmerson\Auth\Providers\AwsCognito\AwsCognitoConfiguration;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoResponseParser;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 $config = require __DIR__ . "/config.php";
+$debugMode = true;
 
 $authContext = new class implements AuthContext
 {
@@ -26,12 +28,21 @@ $authContext = new class implements AuthContext
     }
 };
 
-$logger = new class extends AbstractLogger implements LoggerInterface {
+$logger = new class($debugMode) extends AbstractLogger implements LoggerInterface {
+    private bool $debug;
+
+    public function __construct($debug)
+    {
+        $this->debug = $debug;
+    }
+
     public function log($level, $message, array $context = array())
     {
-        echo "[" . strtoupper($level) . "]: " . $message . PHP_EOL;
-        print_r($context);
-        echo PHP_EOL . PHP_EOL;
+        if ($this->debug || $level !== LogLevel::DEBUG) {
+            echo "[" . strtoupper($level) . "]: " . $message . PHP_EOL;
+            print_r($context);
+            echo PHP_EOL . PHP_EOL;
+        }
     }
 };
 

@@ -35,6 +35,8 @@ try {
     while ($response instanceof AuthChallenge) {
         echo "New password is required!" . PHP_EOL;
 
+        $challengeResponse = "";
+
         if ($response instanceof NewPasswordRequiredChallenge) {
             $challengeResponse = readline("New password required: ");
         } else if ($response instanceof MFARequiredChallenge) {
