@@ -5,14 +5,14 @@ namespace CEmerson\Auth\Providers\Aws;
 use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Aws\Result;
-use CEmerson\Auth\AuthenticationParameters;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationDetailsIncorrectResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationSucceededResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
-use CEmerson\Auth\AuthenticationResponse\UserNotFoundResponse;
+use CEmerson\Auth\AuthParameters;
+use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponse\AuthDetailsIncorrectResponse;
+use CEmerson\Auth\AuthResponse\AuthResponse;
+use CEmerson\Auth\AuthResponse\AuthSucceededResponse;
+use CEmerson\Auth\AuthResponse\UserNotFoundResponse;
 use CEmerson\Auth\AuthProvider;
+use CEmerson\Auth\Providers\Aws\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
 use Exception;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Log\LoggerInterface;
@@ -40,7 +40,7 @@ class AwsCognitoAuthProvider implements AuthProvider
         $this->logger = $logger ?? new NullLogger();
     }
 
-    public function attemptAuthentication(AuthenticationParameters $authParameters): AuthenticationResponse
+    public function attemptAuthentication(AuthParameters $authParameters): AuthResponse
     {
         try {
             return $this->parseCognitoResponse(
@@ -61,8 +61,8 @@ class AwsCognitoAuthProvider implements AuthProvider
     }
 
     public function respondToAuthenticationChallenge(
-        AuthenticationChallengeResponse $authenticationChallengeResponse
-    ): AuthenticationResponse {
+        AuthChallengeResponse $authenticationChallengeResponse
+    ): AuthResponse {
         try {
             $challengeResponses = $authenticationChallengeResponse->getChallengeResponses();
 
@@ -86,7 +86,7 @@ class AwsCognitoAuthProvider implements AuthProvider
         }
     }
 
-    private function parseCognitoResponse(Result $cognitoResponse): AuthenticationResponse
+    private function parseCognitoResponse(Result $cognitoResponse): AuthResponse
     {
         $this->logger->debug('Cognito Response', [
             'response' => $cognitoResponse
@@ -121,7 +121,7 @@ class AwsCognitoAuthProvider implements AuthProvider
             ) {
                 try {
                     //Validate tokens here
-                    return new AuthenticationSucceededResponse(
+                    return new AuthSucceededResponse(
                         $authenticationResult['AccessToken'],
                         $authenticationResult['IdToken'],
                         $authenticationResult['RefreshToken']
@@ -135,7 +135,7 @@ class AwsCognitoAuthProvider implements AuthProvider
         return new UserNotFoundResponse();
     }
 
-    private function parseCognitoException(CognitoIdentityProviderException $ex): AuthenticationResponse
+    private function parseCognitoException(CognitoIdentityProviderException $ex): AuthResponse
     {
         if ($ex->getResponse()->getStatusCode() === StatusCodeInterface::STATUS_BAD_REQUEST) {
             $ex->getResponse()->getBody()->rewind();
@@ -146,11 +146,11 @@ class AwsCognitoAuthProvider implements AuthProvider
 
             switch ($response->__type) {
                 case 'NotAuthorizedException':
-                    return new AuthenticationDetailsIncorrectResponse();
+                    return new AuthDetailsIncorrectResponse();
             }
         }
 
-        return new AuthenticationDetailsIncorrectResponse();
+        return new AuthDetailsIncorrectResponse();
     }
 
     public function changePassword(string $username, string $oldPassword, string $newPassword): bool

@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth;
 
-class AuthenticationParameters
+class AuthParameters
 {
     private string $username;
     private ?string $password;

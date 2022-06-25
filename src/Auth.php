@@ -6,10 +6,10 @@ use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationFailedResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationResponse;
-use CEmerson\Auth\AuthenticationResponse\UserNotFoundResponse;
+use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponse\AuthFailedResponse;
+use CEmerson\Auth\AuthResponse\AuthResponse;
+use CEmerson\Auth\AuthResponse\UserNotFoundResponse;
 use Psr\Log\LoggerInterface;
 
 final class Auth
@@ -29,7 +29,7 @@ final class Auth
         $this->provider = $authProvider;
     }
 
-    public function attemptAuthentication(AuthenticationParameters $authenticationParameters): AuthenticationResponse
+    public function attemptAuthentication(AuthParameters $authenticationParameters): AuthResponse
     {
         $this->logger->info("Attempting authentication with provider {provider}", [
             'provider' => get_class($this->provider)
@@ -39,7 +39,7 @@ final class Auth
 
         if ($authResponse instanceof UserNotFoundResponse) {
             $this->logger->info("Authentication result - User Not Found. Skipping to next provider.");
-        } elseif ($authResponse instanceof AuthenticationFailedResponse) {
+        } elseif ($authResponse instanceof AuthFailedResponse) {
             $this->logger->info("Authentication failed - {response}", [
                 'response' => get_class($authResponse)
             ]);
@@ -58,7 +58,7 @@ final class Auth
         throw new UserNotFound($authResponse);
     }
 
-    public function respondToChallenge(AuthenticationChallengeResponse $challengeResponse): AuthenticationResponse
+    public function respondToChallenge(AuthChallengeResponse $challengeResponse): AuthResponse
     {
         return $this->provider->respondToAuthenticationChallenge($challengeResponse);
     }
@@ -94,7 +94,7 @@ final class Auth
         return $this->session->userHasAuthenticatedThisSession();
     }
 
-    public function reAuthenticateCurrentUser(AuthenticationParameters $authenticationParameters): AuthenticationResponse
+    public function reAuthenticateCurrentUser(AuthParameters $authParameters): AuthResponse
     {
         $currentUser = $this->getCurrentUser();
 

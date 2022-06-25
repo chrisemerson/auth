@@ -6,10 +6,10 @@ use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use CEmerson\Auth\Auth;
 use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
-use CEmerson\Auth\AuthenticationParameters;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallenge;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationSucceededResponse;
+use CEmerson\Auth\AuthParameters;
+use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallenge;
+use CEmerson\Auth\AuthResponse\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
+use CEmerson\Auth\AuthResponse\AuthSucceededResponse;
 use CEmerson\Auth\Providers\Aws\AwsCognitoAuthProvider;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
@@ -61,12 +61,12 @@ $auth = new Auth($authContext, $logger, $provider);
 $username = readline("Username: ");
 $password = readline("Password: ");
 
-$params = new AuthenticationParameters($username, $password);
+$params = new AuthParameters($username, $password);
 
 try {
     $response = $auth->attemptAuthentication($params);
 
-    while ($response instanceof AuthenticationChallenge) {
+    while ($response instanceof AuthChallenge) {
         echo "New password is required!" . PHP_EOL;
         if ($response instanceof NewPasswordRequiredChallenge) {
             $challengeResponse = readline("New password required: ");
@@ -75,7 +75,7 @@ try {
         $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
     }
 
-    if ($response instanceof AuthenticationSucceededResponse) {
+    if ($response instanceof AuthSucceededResponse) {
         echo "Authentication succeeded! You are logged in as " . $response->getIdToken() . PHP_EOL;
     }
 } catch (AuthenticationFailed $ex) {

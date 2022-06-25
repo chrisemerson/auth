@@ -2,20 +2,20 @@
 
 namespace CEmerson\Auth\Providers\Local;
 
-use CEmerson\Auth\AuthenticationParameters;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
-use CEmerson\Auth\AuthenticationResponse\AuthenticationResponse;
+use CEmerson\Auth\AuthParameters;
+use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponse\AuthResponse;
 use CEmerson\Auth\AuthProvider;
 
 class LocalAuthProvider implements AuthProvider
 {
-    public function attemptAuthentication(AuthenticationParameters $authParameters): AuthenticationResponse
+    public function attemptAuthentication(AuthParameters $authParameters): AuthResponse
     {
         // TODO: Implement attemptAuthentication() method.
     }
 
-    public function respondToAuthenticationChallenge(AuthenticationChallengeResponse $authenticationChallengeResponse
-    ): AuthenticationResponse {
+    public function respondToAuthenticationChallenge(AuthChallengeResponse $authenticationChallengeResponse
+    ): AuthResponse {
         // TODO: Implement respondToAuthenticationChallenge() method.
     }
 

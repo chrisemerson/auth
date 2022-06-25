@@ -1,10 +1,10 @@
 <?php
 
-namespace CEmerson\Auth\AuthenticationResponse;
+namespace CEmerson\Auth\AuthResponse;
 
 use CEmerson\Auth\TokenProvider;
 
-class AuthenticationSucceededResponse implements AuthenticationResponse, TokenProvider
+class AuthSucceededResponse implements AuthResponse, TokenProvider
 {
     private string $accessToken;
 

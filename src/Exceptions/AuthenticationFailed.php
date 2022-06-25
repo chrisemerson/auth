@@ -2,15 +2,15 @@
 
 namespace CEmerson\Auth\Exceptions;
 
-use CEmerson\Auth\AuthenticationResponse\AuthenticationFailedResponse;
+use CEmerson\Auth\AuthResponse\AuthFailedResponse;
 use Throwable;
 
 class AuthenticationFailed extends AuthException
 {
-    private ?AuthenticationFailedResponse $authenticationFailedResponse;
+    private ?AuthFailedResponse $authenticationFailedResponse;
 
     public function __construct(
-        ?AuthenticationFailedResponse $authenticationFailedResponse,
+        ?AuthFailedResponse $authenticationFailedResponse,
         $message = "",
         $code = 0,
         Throwable $previous = null
@@ -20,7 +20,7 @@ class AuthenticationFailed extends AuthException
         parent::__construct($message, $code, $previous);
     }
 
-    public function getAuthenticationFailedResponse(): ?AuthenticationFailedResponse
+    public function getAuthenticationFailedResponse(): ?AuthFailedResponse
     {
         return $this->authenticationFailedResponse;
     }

@@ -1,8 +1,8 @@
 <?php
 
-namespace CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge;
+namespace CEmerson\Auth\AuthResponse\AuthChallenge;
 
-interface AuthenticationChallengeResponse
+interface AuthChallengeResponse
 {
     public function getChallengeName(): string;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace CEmerson\Auth\Providers\Aws\AuthenticationChallenge\NewPasswordRequired;
+namespace CEmerson\Auth\Providers\Aws\AuthChallenge\NewPasswordRequired;
 
-use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
+use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;
 
-class NewPasswordRequiredChallengeResponse implements AuthenticationChallengeResponse
+class NewPasswordRequiredChallengeResponse implements AuthChallengeResponse
 {
     private string $challengeId;
     private string $username;
