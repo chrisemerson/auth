@@ -12,6 +12,8 @@ use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\MFARequired\MFARequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthProvider;
+use CEmerson\Auth\Providers\AwsCognito\AwsCognitoConfiguration;
+use CEmerson\Auth\Providers\AwsCognito\AwsCognitoResponseParser;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 
@@ -31,7 +33,7 @@ $logger = new class extends AbstractLogger implements LoggerInterface {
     }
 };
 
-$provider = new AwsCognitoAuthProvider(
+$cognitoConfig = new AwsCognitoConfiguration(
     new CognitoIdentityProviderClient([
         'region' => 'eu-west-1',
         'version' => '2016-04-18',
@@ -42,7 +44,12 @@ $provider = new AwsCognitoAuthProvider(
     ]),
     $config['user_pool_id'],
     $config['client_id'],
-    $config['client_secret'],
+    $config['client_secret']
+);
+
+$provider = new AwsCognitoAuthProvider(
+    $cognitoConfig,
+    new AwsCognitoResponseParser($logger),
     $logger
 );
 
