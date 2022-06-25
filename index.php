@@ -8,9 +8,9 @@ use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallenge;
-use CEmerson\Auth\AuthResponse\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
 use CEmerson\Auth\AuthResponse\AuthSucceededResponse;
-use CEmerson\Auth\Providers\Aws\AwsCognitoAuthProvider;
+use CEmerson\Auth\Providers\AwsCognito\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
+use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthProvider;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 

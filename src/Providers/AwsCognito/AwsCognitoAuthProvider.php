@@ -1,6 +1,6 @@
 <?php
 
-namespace CEmerson\Auth\Providers\Aws;
+namespace CEmerson\Auth\Providers\AwsCognito;
 
 use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
@@ -12,7 +12,7 @@ use CEmerson\Auth\AuthResponse\AuthResponse;
 use CEmerson\Auth\AuthResponse\AuthSucceededResponse;
 use CEmerson\Auth\AuthResponse\UserNotFoundResponse;
 use CEmerson\Auth\AuthProvider;
-use CEmerson\Auth\Providers\Aws\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
+use CEmerson\Auth\Providers\AwsCognito\AuthChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
 use Exception;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Log\LoggerInterface;

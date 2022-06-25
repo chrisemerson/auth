@@ -1,6 +1,6 @@
 <?php
 
-namespace CEmerson\Auth\Providers\Aws\AuthChallenge\NewPasswordRequired;
+namespace CEmerson\Auth\Providers\AwsCognito\AuthChallenge\NewPasswordRequired;
 
 use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallenge;
 use CEmerson\Auth\AuthResponse\AuthChallenge\AuthChallengeResponse;

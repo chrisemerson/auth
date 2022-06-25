@@ -1,6 +1,6 @@
 <?php
 
-namespace CEmerson\Auth\Providers\Aws;
+namespace CEmerson\Auth\Providers\AwsCognito;
 
 use CEmerson\Auth\TokenProvider;
 use CEmerson\Auth\UserProvider;
