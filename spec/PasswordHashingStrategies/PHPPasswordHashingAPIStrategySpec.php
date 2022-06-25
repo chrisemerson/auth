@@ -2,7 +2,7 @@
 
 namespace spec\CEmerson\Auth\PasswordHashingStrategies;
 
-use CEmerson\Auth\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
+use CEmerson\Auth\Providers\Local\PasswordHashingStrategies\PHPPasswordAPI\PHPPasswordAPIWrapper;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 

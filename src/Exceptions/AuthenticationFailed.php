@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth\Exceptions;
 
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationFailedResponse;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationFailedResponse;
 use Throwable;
 
 class AuthenticationFailed extends AuthException

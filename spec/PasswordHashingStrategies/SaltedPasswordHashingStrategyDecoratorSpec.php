@@ -2,7 +2,7 @@
 
 namespace spec\CEmerson\Auth\PasswordHashingStrategies;
 
-use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
+use CEmerson\Auth\Providers\Local\PasswordHashingStrategies\PasswordHashingStrategy;
 use PhpSpec\ObjectBehavior;
 
 class SaltedPasswordHashingStrategyDecoratorSpec extends ObjectBehavior

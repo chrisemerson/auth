@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 require_once __DIR__ . "/vendor/autoload.php";
 
@@ -6,10 +6,11 @@ use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 use CEmerson\Auth\Auth;
 use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
-use CEmerson\Auth\Providers\AuthenticationParameters;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallenge;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
-use CEmerson\Auth\Providers\AwsCognitoAuthProvider;
+use CEmerson\Auth\AuthenticationParameters;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallenge;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\NewPasswordRequired\NewPasswordRequiredChallenge;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationSucceededResponse;
+use CEmerson\Auth\Providers\Aws\AwsCognitoAuthProvider;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 
@@ -74,7 +75,9 @@ try {
         $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
     }
 
-    print_r($response);
+    if ($response instanceof AuthenticationSucceededResponse) {
+        echo "Authentication succeeded! You are logged in as " . $response->getIdToken() . PHP_EOL;
+    }
 } catch (AuthenticationFailed $ex) {
     print_r(get_class($ex->getAuthenticationFailedResponse()));
 }

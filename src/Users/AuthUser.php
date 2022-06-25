@@ -2,7 +2,7 @@
 
 namespace CEmerson\Auth\Users;
 
-use CEmerson\Auth\PasswordHashingStrategies\PasswordHashingStrategy;
+use CEmerson\Auth\Providers\Local\PasswordHashingStrategies\PasswordHashingStrategy;
 
 interface AuthUser
 {

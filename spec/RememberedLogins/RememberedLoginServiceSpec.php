@@ -2,13 +2,13 @@
 
 namespace spec\CEmerson\Auth\RememberedLogins;
 
-use CEmerson\Auth\Cookie\CookieGateway;
+use CEmerson\Auth\AuthContexts\Cookie\CookieGateway;
 use CEmerson\Auth\Exceptions\RememberedLoginNotFound;
 use CEmerson\Auth\RememberedLogins\RememberedLogin;
 use CEmerson\Auth\RememberedLogins\RememberedLoginFactory;
 use CEmerson\Auth\RememberedLogins\RememberedLoginGateway;
 use CEmerson\Auth\RememberedLogins\RememberedLoginService;
-use CEmerson\Auth\Session\Session;
+use CEmerson\Auth\AuthContexts\Session\Session;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Auth\Users\AuthUserGateway;
 use CEmerson\Clock\Clock;

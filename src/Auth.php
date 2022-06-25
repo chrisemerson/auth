@@ -6,12 +6,10 @@ use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
-use CEmerson\Auth\Providers\AuthenticationParameters;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationFailedResponse;
-use CEmerson\Auth\Providers\AuthenticationResponse\AuthenticationResponse;
-use CEmerson\Auth\Providers\AuthenticationResponse\UserNotFoundResponse;
-use CEmerson\Auth\Providers\AuthProvider;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationChallenge\AuthenticationChallengeResponse;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationFailedResponse;
+use CEmerson\Auth\AuthenticationResponse\AuthenticationResponse;
+use CEmerson\Auth\AuthenticationResponse\UserNotFoundResponse;
 use Psr\Log\LoggerInterface;
 
 final class Auth
@@ -33,9 +31,6 @@ final class Auth
 
     public function attemptAuthentication(AuthenticationParameters $authenticationParameters): AuthenticationResponse
     {
-        //Default if no providers are passed - user not found
-        $authResponse = new UserNotFoundResponse();
-
         $this->logger->info("Attempting authentication with provider {provider}", [
             'provider' => get_class($this->provider)
         ]);

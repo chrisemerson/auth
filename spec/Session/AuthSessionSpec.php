@@ -2,8 +2,8 @@
 
 namespace spec\CEmerson\Auth\Session;
 
-use CEmerson\Auth\Session\AuthSession;
-use CEmerson\Auth\Session\SessionGateway;
+use CEmerson\Auth\AuthContexts\Session\AuthSession;
+use CEmerson\Auth\AuthContexts\Session\SessionGateway;
 use CEmerson\Auth\Users\AuthUser;
 use CEmerson\Clock\Clock;
 use DateTimeImmutable;
