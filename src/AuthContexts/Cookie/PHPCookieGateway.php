@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace CEmerson\Auth\AuthContexts\Cookie;
 
@@ -21,14 +23,16 @@ final class PHPCookieGateway implements CookieGateway
 
     public function write(string $key, string $value, DateTimeInterface $expiryDateTime)
     {
-        if (!setcookie(
-            $key,
-            $value,
-            $expiryDateTime->getTimestamp(),
-            '/',
-            $this->cookieDomain,
-            $this->secure
-        )) {
+        if (
+            !setcookie(
+                $key,
+                $value,
+                $expiryDateTime->getTimestamp(),
+                '/',
+                $this->cookieDomain,
+                $this->secure
+            )
+        ) {
             throw new CookieError("Unable to set cookie");
         }
     }

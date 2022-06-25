@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace CEmerson\Auth\Providers\AwsCognito;
 
@@ -115,7 +117,8 @@ class AwsCognitoAuthProvider implements AuthProvider
         if ($cognitoResponse->hasKey('AuthenticationResult')) {
             $authenticationResult = $cognitoResponse->get('AuthenticationResult');
 
-            if (isset($authenticationResult['AccessToken'])
+            if (
+                isset($authenticationResult['AccessToken'])
                 && isset($authenticationResult['IdToken'])
                 && isset($authenticationResult['RefreshToken'])
             ) {

@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace CEmerson\Auth\AuthContexts\Session;
 
@@ -12,11 +14,11 @@ final class AuthSession implements Session, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    const SESSION_ID_REGENERATION_INTERVAL = 300;
+    private const SESSION_ID_REGENERATION_INTERVAL = 300;
 
-    const SESSION_CANARY_NAME = 'cemerson_auth_canary';
-    const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson_auth_auththissession';
-    const SESSION_CURRENT_USER_NAME = 'cemerson_auth_currentuser';
+    private const SESSION_CANARY_NAME = 'cemerson_auth_canary';
+    private const SESSION_AUTH_THIS_SESSION_NAME = 'cemerson_auth_auththissession';
+    private const SESSION_CURRENT_USER_NAME = 'cemerson_auth_currentuser';
 
     /** @var SessionGateway */
     private $sessionGateway;
