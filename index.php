@@ -7,8 +7,6 @@ use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
-use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\MFARequired\MFARequiredChallenge;
-use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
 
 /** @var Auth $auth */
 $auth = require __DIR__ . "/auth.php";
@@ -33,21 +31,13 @@ try {
     $response = $auth->attemptAuthentication($params);
 
     while ($response instanceof AuthChallenge) {
-        echo "New password is required!" . PHP_EOL;
-
-        $challengeResponse = "";
-
-        if ($response instanceof NewPasswordRequiredChallenge) {
-            $challengeResponse = readline("New password required: ");
-        } else if ($response instanceof MFARequiredChallenge) {
-            $challengeResponse = readline("Please enter MFA code: ");
-        }
+        $challengeResponse = readline("Challenge - " . basename(get_class($response)) . ": ");
 
         $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
     }
 
     if ($response instanceof AuthSucceededResponse) {
-        echo "Authentication succeeded! You are logged in as " . $response->getIdToken() . PHP_EOL;
+        echo "Authentication succeeded! You are logged in as " . $auth->getCurrentUser() . PHP_EOL;
     }
 } catch (AuthenticationFailed $ex) {
     print_r(get_class($ex->getAuthenticationFailedResponse()));

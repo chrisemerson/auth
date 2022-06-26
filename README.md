@@ -1,8 +1,8 @@
 # cemerson/auth
 
-A framework & datastorage independent authentication library for PHP
+A library to abstract over different authentication providers.
 
-This library was put together with the help of the following resources:
+The local storage provider was put together with the help of the following resources:
 
 * https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
 
@@ -13,4 +13,3 @@ This library was put together with the help of the following resources:
 - register
 - forgot password
 - migrate user
-- 

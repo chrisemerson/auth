@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace CEmerson\Auth;
 
 use CEmerson\Auth\AuthContexts\AuthContext;
+use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Exceptions\AuthenticationFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Exceptions\UserNotFound;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponses\AuthFailedResponse;
-use CEmerson\Auth\AuthResponses\AuthResponse;
+use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
 use Psr\Log\LoggerInterface;
 
@@ -31,16 +32,26 @@ final class Auth
         $this->provider = $authProvider;
     }
 
-    public function attemptAuthentication(AuthParameters $authenticationParameters): AuthResponse
+    public function attemptAuthentication(AuthParameters $authParameters): AuthResponse
     {
         $this->logger->info("Attempting authentication with provider {provider}", [
             'provider' => get_class($this->provider)
         ]);
 
-        $authResponse = $this->provider->attemptAuthentication($authenticationParameters);
+        $authResponse = $this->provider->attemptAuthentication($authParameters);
 
-        if ($authResponse instanceof UserNotFoundResponse) {
-            $this->logger->info("Authentication result - User Not Found. Skipping to next provider.");
+        if ($authResponse instanceof AuthSucceededResponse) {
+            $this->logger->info("Authentication succeeded!");
+
+            $this->authContext->saveSessionInfo($authResponse->getSessionInfo());
+
+            if ($authParameters->getRememberMe()) {
+                $this->authContext->saveRememberedLoginInfo($authResponse->getRememberedLoginInfo());
+            }
+
+            return $authResponse;
+        } elseif ($authResponse instanceof UserNotFoundResponse) {
+            $this->logger->info("Authentication result - User Not Found.");
         } elseif ($authResponse instanceof AuthFailedResponse) {
             $this->logger->info("Authentication failed - {response}", [
                 'response' => get_class($authResponse)
@@ -81,11 +92,11 @@ final class Auth
 
     public function getCurrentUser(): string
     {
+        return "Unknown user";
+
         if (!$this->isLoggedIn()) {
             throw new NoUserLoggedIn();
         }
-
-        return $this->session->getLoggedInUsername();
     }
 
     public function hasAuthenticatedThisSession(): bool

@@ -4,35 +4,11 @@ declare(strict_types=1);
 
 namespace CEmerson\Auth\AuthResponses;
 
-use CEmerson\Auth\TokenProvider;
+use CEmerson\Auth\AuthResponse;
 
-class AuthSucceededResponse implements AuthResponse, TokenProvider
+interface AuthSucceededResponse extends AuthResponse
 {
-    private string $accessToken;
+    public function getSessionInfo(): array;
 
-    private string $idToken;
-
-    private string $refreshToken;
-
-    public function __construct(string $accessToken, string $idToken, string $refreshToken)
-    {
-        $this->accessToken = $accessToken;
-        $this->idToken = $idToken;
-        $this->refreshToken = $refreshToken;
-    }
-
-    public function getAccessToken(): string
-    {
-        return $this->accessToken;
-    }
-
-    public function getIdToken(): string
-    {
-        return $this->idToken;
-    }
-
-    public function getRefreshToken(): string
-    {
-        return $this->refreshToken;
-    }
+    public function getRememberedLoginInfo(): array;
 }

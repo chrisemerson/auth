@@ -8,7 +8,7 @@ use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthProvider;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponses\AuthResponse;
+use CEmerson\Auth\AuthResponse;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 

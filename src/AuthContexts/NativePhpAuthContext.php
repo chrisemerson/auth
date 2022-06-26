@@ -6,13 +6,23 @@ namespace CEmerson\Auth\AuthContexts;
 
 class NativePhpAuthContext implements AuthContext
 {
-    public function deleteSessionInfo()
+    public function saveSessionInfo(array $sessionInfo): void
+    {
+        // TODO: Implement saveSessionInfo() method.
+    }
+
+    public function deleteSessionInfo(): void
     {
         // TODO: Implement deleteSessionInfo() method.
     }
 
-    public function deleteRememberedLogin()
+    public function saveRememberedLoginInfo(array $rememberedLoginInfo): void
     {
-        // TODO: Implement deleteRememberedLogin() method.
+        // TODO: Implement saveRememberedLoginInfo() method.
+    }
+
+    public function deleteRememberedLoginInfo(): void
+    {
+        // TODO: Implement deleteRememberedLoginInfo() method.
     }
 }

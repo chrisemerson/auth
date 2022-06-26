@@ -7,7 +7,7 @@ namespace CEmerson\Auth;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponses\AuthResponse;
+use CEmerson\Auth\AuthResponse;
 
 interface AuthProvider
 {

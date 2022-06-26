@@ -15,16 +15,51 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 $config = require __DIR__ . "/config.php";
-$debugMode = true;
+$debugMode = false;
 
 $authContext = new class implements AuthContext
 {
-    public function deleteSessionInfo()
+    private const SESSION_FILENAME = __DIR__ . "/session.json";
+    private const REMEMBERED_LOGIN_FILENAME = __DIR__ . "/rememberedlogin.json";
+
+    public function saveSessionInfo(array $sessionInfo): void
     {
+        $this->saveInfoToFile(self::SESSION_FILENAME, $sessionInfo);
     }
 
-    public function deleteRememberedLogin()
+    public function deleteSessionInfo(): void
     {
+        $this->deleteIfExists(self::SESSION_FILENAME);
+    }
+
+    public function saveRememberedLoginInfo(array $rememberedLoginInfo): void
+    {
+        $this->saveInfoToFile(self::REMEMBERED_LOGIN_FILENAME, $rememberedLoginInfo);
+    }
+
+    public function deleteRememberedLoginInfo(): void
+    {
+        $this->deleteIfExists(self::REMEMBERED_LOGIN_FILENAME);
+    }
+
+    private function saveInfoToFile($filename, $data)
+    {
+        $json = [];
+
+        if (file_exists($filename)) {
+            $json = json_decode(file_get_contents($filename), true);
+        }
+
+        $json = array_merge($json, $data);
+
+        file_put_contents($filename, json_encode($json));
+    }
+
+    private function deleteIfExists($filename)
+    {
+        if (file_exists($filename)) {
+            unlink($filename);
+        }
     }
 };
 
@@ -39,10 +74,33 @@ $logger = new class($debugMode) extends AbstractLogger implements LoggerInterfac
     public function log($level, $message, array $context = array())
     {
         if ($this->debug || $level !== LogLevel::DEBUG) {
-            echo "[" . strtoupper($level) . "]: " . $message . PHP_EOL;
-            print_r($context);
-            echo PHP_EOL . PHP_EOL;
+            echo "[" . strtoupper($level) . "]: " . $this->replacePsr3ContextVars($message, $context) . PHP_EOL;
+
+            if ($this->debug) {
+                print_r($context);
+                echo PHP_EOL . PHP_EOL;
+            }
         }
+    }
+
+    private function replacePsr3ContextVars(string $message, array $context): string
+    {
+        return str_replace(
+            array_map(
+                fn ($token) => '{' . $token . '}',
+                array_keys($context)
+            ),
+            array_map(
+                fn($value) => $this->getDisplayString($value),
+                array_values($context)
+            ),
+            $message
+        );
+    }
+
+    private function getDisplayString(mixed $value): string
+    {
+        return (string) $value;
     }
 };
 

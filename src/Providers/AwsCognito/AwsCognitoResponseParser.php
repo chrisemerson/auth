@@ -7,8 +7,7 @@ namespace CEmerson\Auth\Providers\AwsCognito;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Aws\Result;
 use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
-use CEmerson\Auth\AuthResponses\AuthResponse;
-use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
+use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
 use Exception;
@@ -60,7 +59,7 @@ class AwsCognitoResponseParser
             ) {
                 try {
                     //Validate tokens here
-                    return new AuthSucceededResponse(
+                    return new AwsCognitoAuthSucceededResponse(
                         $authenticationResult['AccessToken'],
                         $authenticationResult['IdToken'],
                         $authenticationResult['RefreshToken']
@@ -80,8 +79,9 @@ class AwsCognitoResponseParser
             $ex->getResponse()->getBody()->rewind();
             $response = json_decode($ex->getResponse()->getBody()->getContents());
 
-            print_r($response);
-
+            $this->logger->debug("Exception contents", [
+                'exception' => $response
+            ]);
 
             switch ($response->__type) {
                 case 'NotAuthorizedException':

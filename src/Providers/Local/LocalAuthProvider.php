@@ -6,7 +6,7 @@ namespace CEmerson\Auth\Providers\Local;
 
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponses\AuthResponse;
+use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthProvider;
 
 class LocalAuthProvider implements AuthProvider

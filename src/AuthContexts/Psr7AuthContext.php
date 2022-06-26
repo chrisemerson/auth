@@ -9,23 +9,35 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Psr7AuthContext implements AuthContext
 {
-    public function deleteSessionInfo()
+    private array $sessionInfo = [];
+
+    private array $rememberedLoginInfo = [];
+
+    public function saveSessionInfo(array $sessionInfo): void
     {
-        // TODO: Implement deleteSessionInfo() method.
+        $this->sessionInfo = $sessionInfo;
     }
 
-    public function deleteRememberedLogin()
+    public function deleteSessionInfo(): void
     {
-        // TODO: Implement deleteRememberedLogin() method.
+        $this->sessionInfo = [];
+    }
+
+    public function saveRememberedLoginInfo(array $rememberedLoginInfo): void
+    {
+        $this->rememberedLoginInfo = $rememberedLoginInfo;
+    }
+
+    public function deleteRememberedLoginInfo(): void
+    {
+        $this->rememberedLoginInfo = [];
     }
 
     public function populateContextFromPsr7Request(ServerRequestInterface $request)
     {
-
     }
 
     public function addContextValuesToResponse(ResponseInterface $response)
     {
-
     }
 }
