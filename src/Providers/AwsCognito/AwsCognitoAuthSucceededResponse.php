@@ -12,6 +12,10 @@ class AwsCognitoAuthSucceededResponse implements AuthSucceededResponse
     private string $idToken;
     private string $refreshToken;
 
+    public const ACCESS_TOKEN_KEY_NAME = "accessToken";
+    public const ID_TOKEN_KEY_NAME = "idToken";
+    public const REFRESH_TOKEN_KEY_NAME = "refreshToken";
+
     public function __construct(string $accessToken, string $idToken, string $refreshToken)
     {
         $this->accessToken = $accessToken;
@@ -22,16 +26,16 @@ class AwsCognitoAuthSucceededResponse implements AuthSucceededResponse
     public function getSessionInfo(): array
     {
         return [
-            'accessToken' => $this->accessToken,
-            'idToken' => $this->idToken,
-            'refreshToken' => $this->refreshToken
+            self::ACCESS_TOKEN_KEY_NAME => $this->accessToken,
+            self::ID_TOKEN_KEY_NAME => $this->idToken,
+            self::REFRESH_TOKEN_KEY_NAME => $this->refreshToken
         ];
     }
 
     public function getRememberedLoginInfo(): array
     {
         return [
-            'refreshToken' => $this->refreshToken
+            self::REFRESH_TOKEN_KEY_NAME => $this->refreshToken
         ];
     }
 }

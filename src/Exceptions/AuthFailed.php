@@ -7,7 +7,7 @@ namespace CEmerson\Auth\Exceptions;
 use CEmerson\Auth\AuthResponses\AuthFailedResponse;
 use Throwable;
 
-class AuthenticationFailed extends AuthException
+class AuthFailed extends AuthException
 {
     private ?AuthFailedResponse $authenticationFailedResponse;
 

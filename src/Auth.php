@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace CEmerson\Auth;
 
 use CEmerson\Auth\AuthContexts\AuthContext;
-use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
-use CEmerson\Auth\Exceptions\AuthenticationFailed;
-use CEmerson\Auth\Exceptions\NoUserLoggedIn;
-use CEmerson\Auth\Exceptions\UserNotFound;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
-use CEmerson\Auth\AuthResponses\AuthFailedResponse;
-use CEmerson\Auth\AuthResponse;
-use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
+use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
+use CEmerson\Auth\Exceptions\AuthFailed;
+use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use Psr\Log\LoggerInterface;
 
 final class Auth
@@ -28,14 +24,15 @@ final class Auth
     ) {
         $this->authContext = $authContext;
         $this->logger = $logger;
-
         $this->provider = $authProvider;
+
+        $this->attemptToLoadAuthStatusFromRememberedLoginInfo();
     }
 
-    public function attemptAuthentication(AuthParameters $authParameters): AuthResponse
+    public function attemptAuthentication(AuthParameters $authParameters): bool
     {
         $this->logger->info("Attempting authentication with provider {provider}", [
-            'provider' => get_class($this->provider)
+            'provider' => basename(get_class($this->provider))
         ]);
 
         $authResponse = $this->provider->attemptAuthentication($authParameters);
@@ -49,26 +46,14 @@ final class Auth
                 $this->authContext->saveRememberedLoginInfo($authResponse->getRememberedLoginInfo());
             }
 
-            return $authResponse;
-        } elseif ($authResponse instanceof UserNotFoundResponse) {
-            $this->logger->info("Authentication result - User Not Found.");
-        } elseif ($authResponse instanceof AuthFailedResponse) {
-            $this->logger->info("Authentication failed - {response}", [
-                'response' => get_class($authResponse)
-            ]);
-
-            throw new AuthenticationFailed($authResponse);
-        } else {
-            $this->logger->info("Authentication response - {response}", [
-                'response' => get_class($authResponse)
-            ]);
-
-            return $authResponse;
+            return true;
         }
 
-        $this->logger->info("User was not found after trying all providers.");
+        $this->logger->info("Authentication failed - {response}", [
+            'response' => get_class($authResponse)
+        ]);
 
-        throw new UserNotFound($authResponse);
+        throw new AuthFailed($authResponse);
     }
 
     public function respondToChallenge(AuthChallengeResponse $challengeResponse): AuthResponse
@@ -80,41 +65,40 @@ final class Auth
     {
         $this->provider->logout();
         $this->authContext->deleteSessionInfo();
-        $this->authContext->deleteRememberedLogin();
+        $this->authContext->deleteRememberedLoginInfo();
     }
 
     public function isLoggedIn(): bool
     {
-        $this->rememberedLoginService->loadRememberedLoginFromCookie();
-
-        return $this->session->userIsLoggedIn();
+        return $this->provider->isSessionValid($this->authContext->getSessionInfo());
     }
 
-    public function getCurrentUser(): string
+    public function getCurrentUsername(): string
     {
-        return "Unknown user";
-
         if (!$this->isLoggedIn()) {
             throw new NoUserLoggedIn();
         }
+
+        return "Unknown user";
     }
 
     public function hasAuthenticatedThisSession(): bool
     {
-        $this->rememberedLoginService->loadRememberedLoginFromCookie();
-
-        return $this->session->userHasAuthenticatedThisSession();
+        return false;
     }
 
     public function reAuthenticateCurrentUser(AuthParameters $authParameters): AuthResponse
     {
-        $currentUser = $this->getCurrentUser();
-
-        return $this->handleUserAuthentication($currentUser, $password, true);
     }
 
-    public function cleanup()
+    private function attemptToLoadAuthStatusFromRememberedLoginInfo()
     {
-        $this->rememberedLoginService->cleanupExpiredRememberedLogins();
+        if (!$this->isLoggedIn()) {
+            $sessionInfo = $this->provider->refreshSessionFromRememberedLoginInfo(
+                $this->authContext->getRememberedLoginInfo()
+            );
+
+            $this->authContext->saveSessionInfo($sessionInfo);
+        }
     }
 }

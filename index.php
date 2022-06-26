@@ -6,7 +6,7 @@ use CEmerson\Auth\Auth;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
-use CEmerson\Auth\Exceptions\AuthenticationFailed;
+use CEmerson\Auth\Exceptions\AuthFailed;
 
 /** @var Auth $auth */
 $auth = require __DIR__ . "/auth.php";
@@ -22,23 +22,34 @@ $auth = require __DIR__ . "/auth.php";
  - Remembered login (save in file)
  - If file exists, authenticate with it */
 
-$username = readline("Username: ");
-$password = readline("Password: ");
+if ($auth->isLoggedIn()) {
+    echo "Logged in as " . $auth->getCurrentUsername() . PHP_EOL;
 
-$params = new AuthParameters($username, $password);
+    $logout = readline("Logout?: ");
 
-try {
-    $response = $auth->attemptAuthentication($params);
-
-    while ($response instanceof AuthChallenge) {
-        $challengeResponse = readline("Challenge - " . basename(get_class($response)) . ": ");
-
-        $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
+    if (strtoupper($logout) == "Y") {
+        $auth->logout();
+        echo "Logged out" . PHP_EOL;
     }
+} else {
+    $username = readline("Username: ");
+    $password = readline("Password: ");
 
-    if ($response instanceof AuthSucceededResponse) {
-        echo "Authentication succeeded! You are logged in as " . $auth->getCurrentUser() . PHP_EOL;
+    $params = new AuthParameters($username, $password);
+
+    try {
+        $response = $auth->attemptAuthentication($params);
+
+        while ($response instanceof AuthChallenge) {
+            $challengeResponse = readline("Challenge - " . basename(get_class($response)) . ": ");
+
+            $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
+        }
+
+        if ($response instanceof AuthSucceededResponse) {
+            echo "Authentication succeeded! You are logged in as " . $auth->getCurrentUsername() . PHP_EOL;
+        }
+    } catch (AuthFailed $ex) {
+        print_r(get_class($ex->getAuthenticationFailedResponse()));
     }
-} catch (AuthenticationFailed $ex) {
-    print_r(get_class($ex->getAuthenticationFailedResponse()));
 }

@@ -24,4 +24,8 @@ interface AuthProvider
     public function registerUser(string $username, string $password);
 
     public function logout();
+
+    public function isSessionValid(array $sessionInfo): bool;
+
+    public function refreshSessionFromRememberedLoginInfo(array $rememberedLoginInfo): array;
 }

@@ -22,6 +22,11 @@ $authContext = new class implements AuthContext
     private const SESSION_FILENAME = __DIR__ . "/session.json";
     private const REMEMBERED_LOGIN_FILENAME = __DIR__ . "/rememberedlogin.json";
 
+    public function getSessionInfo(): array
+    {
+        return $this->getDataFromFile(self::SESSION_FILENAME);
+    }
+
     public function saveSessionInfo(array $sessionInfo): void
     {
         $this->saveInfoToFile(self::SESSION_FILENAME, $sessionInfo);
@@ -30,6 +35,11 @@ $authContext = new class implements AuthContext
     public function deleteSessionInfo(): void
     {
         $this->deleteIfExists(self::SESSION_FILENAME);
+    }
+
+    public function getRememberedLoginInfo(): array
+    {
+        return $this->getDataFromFile(self::REMEMBERED_LOGIN_FILENAME);
     }
 
     public function saveRememberedLoginInfo(array $rememberedLoginInfo): void
@@ -42,7 +52,7 @@ $authContext = new class implements AuthContext
         $this->deleteIfExists(self::REMEMBERED_LOGIN_FILENAME);
     }
 
-    private function saveInfoToFile($filename, $data)
+    private function saveInfoToFile(string $filename, array $data)
     {
         $json = [];
 
@@ -55,10 +65,19 @@ $authContext = new class implements AuthContext
         file_put_contents($filename, json_encode($json));
     }
 
-    private function deleteIfExists($filename)
+    private function deleteIfExists(string $filename)
     {
         if (file_exists($filename)) {
             unlink($filename);
+        }
+    }
+
+    private function getDataFromFile(string $filename): array
+    {
+        if (file_exists($filename)) {
+            return json_decode(file_get_contents($filename), true);
+        } else {
+            return [];
         }
     }
 };

@@ -7,8 +7,8 @@ namespace CEmerson\Auth\Providers\AwsCognito;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthProvider;
-use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponse;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -16,15 +16,18 @@ class AwsCognitoAuthProvider implements AuthProvider
 {
     private AwsCognitoConfiguration $awsCognitoConfiguration;
     private AwsCognitoResponseParser $awsCognitoResponseParser;
+    private JwtTokenValidator $tokenValidator;
     private LoggerInterface $logger;
 
     public function __construct(
         AwsCognitoConfiguration $awsCognitoConfiguration,
         AwsCognitoResponseParser $awsCognitoResponseParser,
+        JwtTokenValidator $tokenValidator,
         LoggerInterface $logger = null
     ) {
         $this->awsCognitoConfiguration = $awsCognitoConfiguration;
         $this->awsCognitoResponseParser = $awsCognitoResponseParser;
+        $this->tokenValidator = $tokenValidator;
         $this->logger = $logger ?? new NullLogger();
     }
 
@@ -91,6 +94,17 @@ class AwsCognitoAuthProvider implements AuthProvider
 
     public function logout()
     {
-        // TODO: Implement logout() method.
+    }
+
+    public function isSessionValid(array $sessionInfo): bool
+    {
+        return $this->tokenValidator->validateToken(
+            $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME]
+        );
+    }
+
+    public function refreshSessionFromRememberedLoginInfo(array $rememberedLoginInfo): array
+    {
+        return [];
     }
 }

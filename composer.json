@@ -14,6 +14,7 @@
         "aws/aws-sdk-php": "^3.222",
         "cemerson/clock": "^1.2",
         "fig/http-message-util": "^1.1",
+        "lcobucci/jwt": "^4.1",
         "paragonie/password_lock": "^3.1",
         "psr/http-server-middleware": "^1.0",
         "psr/log": "^1.1"
