@@ -16,13 +16,13 @@ class AwsCognitoAuthProvider implements AuthProvider
 {
     private AwsCognitoConfiguration $awsCognitoConfiguration;
     private AwsCognitoResponseParser $awsCognitoResponseParser;
-    private JwtTokenValidator $tokenValidator;
+    private AwsCognitoJwtTokenValidator $tokenValidator;
     private LoggerInterface $logger;
 
     public function __construct(
         AwsCognitoConfiguration $awsCognitoConfiguration,
         AwsCognitoResponseParser $awsCognitoResponseParser,
-        JwtTokenValidator $tokenValidator,
+        AwsCognitoJwtTokenValidator $tokenValidator,
         LoggerInterface $logger = null
     ) {
         $this->awsCognitoConfiguration = $awsCognitoConfiguration;

@@ -10,9 +10,11 @@ use CEmerson\Auth\AuthContexts\AuthContext;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthProvider;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoConfiguration;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoResponseParser;
+use CEmerson\Auth\Providers\AwsCognito\AwsCognitoJwtTokenValidator;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use StellaMaris\Clock\ClockInterface;
 
 $config = require __DIR__ . "/config.php";
 $debugMode = false;
@@ -137,10 +139,18 @@ $cognitoConfig = new AwsCognitoConfiguration(
     $config['client_secret']
 );
 
+$clock = new class implements ClockInterface {
+    public function now(): DateTimeImmutable
+    {
+        return new DateTimeImmutable();
+    }
+};
+
 $provider = new AwsCognitoAuthProvider(
     $cognitoConfig,
     new AwsCognitoResponseParser($logger),
+    new AwsCognitoJwtTokenValidator($cognitoConfig, $clock),
     $logger
 );
 
-return new Auth($authContext, $logger, $provider);
+return new Auth($provider, $authContext, $logger);

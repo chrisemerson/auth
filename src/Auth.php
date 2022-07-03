@@ -18,9 +18,9 @@ final class Auth
     private AuthProvider $provider;
 
     public function __construct(
+        AuthProvider $authProvider,
         AuthContext $authContext,
-        LoggerInterface $logger,
-        AuthProvider $authProvider
+        LoggerInterface $logger
     ) {
         $this->authContext = $authContext;
         $this->logger = $logger;

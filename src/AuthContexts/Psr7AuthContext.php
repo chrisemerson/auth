@@ -13,6 +13,11 @@ class Psr7AuthContext implements AuthContext
 
     private array $rememberedLoginInfo = [];
 
+    public function getSessionInfo(): array
+    {
+        return [];
+    }
+
     public function saveSessionInfo(array $sessionInfo): void
     {
         $this->sessionInfo = $sessionInfo;
@@ -21,6 +26,11 @@ class Psr7AuthContext implements AuthContext
     public function deleteSessionInfo(): void
     {
         $this->sessionInfo = [];
+    }
+
+    public function getRememberedLoginInfo(): array
+    {
+        return [];
     }
 
     public function saveRememberedLoginInfo(array $rememberedLoginInfo): void

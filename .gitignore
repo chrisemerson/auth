@@ -3,5 +3,6 @@
 /vendor/
 
 config.php
+jwks.json
 session.json
 rememberedlogin.json

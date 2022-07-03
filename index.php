@@ -22,34 +22,59 @@ $auth = require __DIR__ . "/auth.php";
  - Remembered login (save in file)
  - If file exists, authenticate with it */
 
-if ($auth->isLoggedIn()) {
-    echo "Logged in as " . $auth->getCurrentUsername() . PHP_EOL;
+$command = null;
 
-    $logout = readline("Logout?: ");
+while (!$auth->isLoggedIn() || strtolower($command) !== "e") {
+    if ($auth->isLoggedIn()) {
+        echo "Logged in as " . $auth->getCurrentUsername() . PHP_EOL;
 
-    if (strtoupper($logout) == "Y") {
-        $auth->logout();
-        echo "Logged out" . PHP_EOL;
-    }
-} else {
-    $username = readline("Username: ");
-    $password = readline("Password: ");
+        $command = readline("[l]ogout, [c]hange password, [s]etup MFA, [e]xit?: ");
 
-    $params = new AuthParameters($username, $password);
+        switch (strtolower($command)) {
+            case 'l':
+                $auth->logout();;
+                echo "Logged out" . PHP_EOL;
+                $command = "e";
+                break;
 
-    try {
-        $response = $auth->attemptAuthentication($params);
+            case 'c':
+                break;
 
-        while ($response instanceof AuthChallenge) {
-            $challengeResponse = readline("Challenge - " . basename(get_class($response)) . ": ");
-
-            $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
+            case 's':
+                break;
         }
+    } else {
+        echo "Not logged in" . PHP_EOL;
 
-        if ($response instanceof AuthSucceededResponse) {
-            echo "Authentication succeeded! You are logged in as " . $auth->getCurrentUsername() . PHP_EOL;
+        $command = readline("[l]ogin, or [f]orgot password?: ");
+
+        switch (strtolower($command)) {
+            case 'l':
+                $username = readline("Username: ");
+                $password = readline("Password: ");
+
+                $params = new AuthParameters($username, $password);
+
+                try {
+                    $response = $auth->attemptAuthentication($params);
+
+                    while ($response instanceof AuthChallenge) {
+                        $challengeResponse = readline("Challenge - " . basename(get_class($response)) . ": ");
+
+                        $response = $auth->respondToChallenge($response->createChallengeResponse($challengeResponse));
+                    }
+
+                    if ($response instanceof AuthSucceededResponse) {
+                        echo "Authentication succeeded! You are logged in as " . $auth->getCurrentUsername() . PHP_EOL;
+                    }
+                } catch (AuthFailed $ex) {
+                    print_r(get_class($ex->getAuthenticationFailedResponse()));
+                }
+                break;
+
+            case 'f':
+
+                break;
         }
-    } catch (AuthFailed $ex) {
-        print_r(get_class($ex->getAuthenticationFailedResponse()));
     }
 }
