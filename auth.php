@@ -121,6 +121,10 @@ $logger = new class($debugMode) extends AbstractLogger implements LoggerInterfac
 
     private function getDisplayString(mixed $value): string
     {
+        if (is_object($value) && !method_exists($value, '__toString')) {
+            return 'Class: ' . get_class($value);
+        }
+
         return (string) $value;
     }
 };
@@ -136,7 +140,8 @@ $cognitoConfig = new AwsCognitoConfiguration(
     ]),
     $config['user_pool_id'],
     $config['client_id'],
-    $config['client_secret']
+    $config['client_secret'],
+    trim(file_get_contents(__DIR__ . "/jwks.json"))
 );
 
 $clock = new class implements ClockInterface {
@@ -146,10 +151,12 @@ $clock = new class implements ClockInterface {
     }
 };
 
+$validator = new AwsCognitoJwtTokenValidator($cognitoConfig, $clock, $logger);
+
 $provider = new AwsCognitoAuthProvider(
     $cognitoConfig,
-    new AwsCognitoResponseParser($logger),
-    new AwsCognitoJwtTokenValidator($cognitoConfig, $clock),
+    new AwsCognitoResponseParser($logger, $validator),
+    $validator,
     $logger
 );
 

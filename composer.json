@@ -12,6 +12,7 @@
         "php": "^7.4 | ^8.0",
         "ext-json": "*",
         "aws/aws-sdk-php": "^3.222",
+        "codercat/jwk-to-pem": "^1.1",
         "fig/http-message-util": "^1.1",
         "lcobucci/jwt": "^4.1",
         "paragonie/password_lock": "^3.1",
@@ -20,7 +21,6 @@
         "stella-maris/clock": "^0.1.4"
     },
     "require-dev": {
-        "phpspec/phpspec": "^7.0",
         "phpstan/phpstan": "^1.7",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-master@dev",

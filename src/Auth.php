@@ -9,6 +9,10 @@ use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Exceptions\AuthFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
+use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthSucceededResponse;
+use Exception;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\Parser;
 use Psr\Log\LoggerInterface;
 
 final class Auth
@@ -70,6 +74,11 @@ final class Auth
 
     public function isLoggedIn(): bool
     {
+        if (!$this->provider->isSessionValid($this->authContext->getSessionInfo())) {
+            $this->authContext->deleteSessionInfo();
+            $this->attemptToLoadAuthStatusFromRememberedLoginInfo();
+        }
+
         return $this->provider->isSessionValid($this->authContext->getSessionInfo());
     }
 
@@ -79,7 +88,11 @@ final class Auth
             throw new NoUserLoggedIn();
         }
 
-        return "Unknown user";
+        $idToken = $this->authContext->getSessionInfo()[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME];
+
+        $unencryptedToken = (new Parser(new JoseEncoder()))->parse($idToken);
+
+        return $unencryptedToken->claims()->get('cognito:username');
     }
 
     public function hasAuthenticatedThisSession(): bool
@@ -93,12 +106,14 @@ final class Auth
 
     private function attemptToLoadAuthStatusFromRememberedLoginInfo()
     {
-        if (!$this->isLoggedIn()) {
+        try {
             $sessionInfo = $this->provider->refreshSessionFromRememberedLoginInfo(
                 $this->authContext->getRememberedLoginInfo()
             );
 
             $this->authContext->saveSessionInfo($sessionInfo);
+        } catch (Exception $e) {
+            //no op
         }
     }
 }

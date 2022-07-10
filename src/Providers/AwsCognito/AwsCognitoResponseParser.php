@@ -8,19 +8,25 @@ use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Aws\Result;
 use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
 use CEmerson\Auth\AuthResponse;
+use CEmerson\Auth\AuthResponses\TokenValidationError;
 use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
+use CEmerson\Auth\Exceptions\AuthFailed;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
 use Exception;
 use Fig\Http\Message\StatusCodeInterface;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\Parser;
 use Psr\Log\LoggerInterface;
 
 class AwsCognitoResponseParser
 {
     private LoggerInterface $logger;
+    private AwsCognitoJwtTokenValidator $validator;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, AwsCognitoJwtTokenValidator $validator)
     {
         $this->logger = $logger;
+        $this->validator = $validator;
     }
 
     public function parseCognitoResponse(Result $cognitoResponse): AuthResponse
@@ -55,18 +61,20 @@ class AwsCognitoResponseParser
             if (
                 isset($authenticationResult['AccessToken'])
                 && isset($authenticationResult['IdToken'])
-                && isset($authenticationResult['RefreshToken'])
+                && $this->validator->validateToken($authenticationResult['AccessToken'], 'access')
+                && $this->validator->validateToken($authenticationResult['IdToken'], 'id')
             ) {
-                try {
-                    //Validate tokens here
-                    return new AwsCognitoAuthSucceededResponse(
-                        $authenticationResult['AccessToken'],
-                        $authenticationResult['IdToken'],
-                        $authenticationResult['RefreshToken']
-                    );
-                } catch (Exception $e) {
-                    //return something here, gone wrong
-                }
+                return new AwsCognitoAuthSucceededResponse(
+                    (new Parser(new JoseEncoder()))
+                        ->parse($authenticationResult['IdToken'])
+                        ->claims()
+                        ->get('cognito:username'),
+                    $authenticationResult['AccessToken'],
+                    $authenticationResult['IdToken'],
+                    $authenticationResult['RefreshToken'] ?? null
+                );
+            } else {
+                return new TokenValidationError();
             }
         }
 

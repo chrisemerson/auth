@@ -22,9 +22,9 @@ $auth = require __DIR__ . "/auth.php";
  - Remembered login (save in file)
  - If file exists, authenticate with it */
 
-$command = null;
+$command = '';
 
-while (!$auth->isLoggedIn() || strtolower($command) !== "e") {
+while (strtolower($command) !== "e") {
     if ($auth->isLoggedIn()) {
         echo "Logged in as " . $auth->getCurrentUsername() . PHP_EOL;
 
@@ -34,7 +34,6 @@ while (!$auth->isLoggedIn() || strtolower($command) !== "e") {
             case 'l':
                 $auth->logout();;
                 echo "Logged out" . PHP_EOL;
-                $command = "e";
                 break;
 
             case 'c':
@@ -46,14 +45,14 @@ while (!$auth->isLoggedIn() || strtolower($command) !== "e") {
     } else {
         echo "Not logged in" . PHP_EOL;
 
-        $command = readline("[l]ogin, or [f]orgot password?: ");
+        $command = readline("[l]ogin, [f]orgot password, [e]xit?: ");
 
         switch (strtolower($command)) {
             case 'l':
                 $username = readline("Username: ");
                 $password = readline("Password: ");
 
-                $params = new AuthParameters($username, $password);
+                $params = new AuthParameters($username, $password, true);
 
                 try {
                     $response = $auth->attemptAuthentication($params);
@@ -73,7 +72,6 @@ while (!$auth->isLoggedIn() || strtolower($command) !== "e") {
                 break;
 
             case 'f':
-
                 break;
         }
     }

@@ -9,6 +9,8 @@ use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthProvider;
 use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -42,6 +44,27 @@ class AwsCognitoAuthProvider implements AuthProvider
                         'PASSWORD' => $authParameters->getPassword(),
                         'SECRET_HASH' => $this->awsCognitoConfiguration->hash(
                             $authParameters->getUsername() . $this->awsCognitoConfiguration->getClientId(),
+                        )
+                    ],
+                    'ClientId' => $this->awsCognitoConfiguration->getClientId(),
+                    'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
+                ])
+            );
+        } catch (CognitoIdentityProviderException $ex) {
+            return $this->awsCognitoResponseParser->parseCognitoException($ex);
+        }
+    }
+
+    public function attemptAuthenticationWithRefreshToken(string $refreshToken, string $username): AuthResponse
+    {
+        try {
+            return $this->awsCognitoResponseParser->parseCognitoResponse(
+                $this->awsCognitoConfiguration->getAwsCognitoClient()->adminInitiateAuth([
+                    'AuthFlow' => 'REFRESH_TOKEN_AUTH',
+                    'AuthParameters' => [
+                        'REFRESH_TOKEN' => $refreshToken,
+                        'SECRET_HASH' => $this->awsCognitoConfiguration->hash(
+                            $username . $this->awsCognitoConfiguration->getClientId(),
                         )
                     ],
                     'ClientId' => $this->awsCognitoConfiguration->getClientId(),
@@ -98,13 +121,47 @@ class AwsCognitoAuthProvider implements AuthProvider
 
     public function isSessionValid(array $sessionInfo): bool
     {
-        return $this->tokenValidator->validateToken(
-            $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME]
-        );
+        return
+            isset($sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME])
+            && $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME] !== null
+            && $this->tokenValidator->validateToken(
+                $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
+                'access'
+            )
+            && isset($sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME])
+            && $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME] !== null
+            && $this->tokenValidator->validateToken(
+                $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME],
+                'id'
+            );
     }
 
     public function refreshSessionFromRememberedLoginInfo(array $rememberedLoginInfo): array
     {
+        if (
+            !isset($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
+            || is_null($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
+            || !isset($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
+            || is_null($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
+        ) {
+            throw new Exception();
+        }
+
+        $refreshToken = $rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME];
+        $username = $rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME];
+
+        $response = $this->attemptAuthenticationWithRefreshToken($refreshToken, $username);
+
+        if ($response instanceof AuthSucceededResponse) {
+            return array_merge(
+                $response->getSessionInfo(),
+                [
+                    AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME => $username,
+                    AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME => $refreshToken
+                ]
+            );
+        }
+
         return [];
     }
 }
