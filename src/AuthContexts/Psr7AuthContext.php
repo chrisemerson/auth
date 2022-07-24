@@ -18,15 +18,30 @@ class Psr7AuthContext implements AuthContext
     private array $newRememberedLoginInfo = [];
     private array $rememberedLoginInfoToExpire = [];
 
+    private string $prefix;
+
+    public function __construct(string $prefix = 'ceauth_')
+    {
+        $this->prefix = $prefix;
+    }
+
     public function getSessionInfo(): array
     {
-        return $_SESSION;
+        $sessionInfo = [];
+
+        foreach ($_SESSION as $name => $value) {
+            if (substr($name, 0, strlen($name)) === $this->prefix) {
+                $sessionInfo[substr($name, strlen($name))] = $value;
+            }
+        }
+
+        return $sessionInfo;
     }
 
     public function saveSessionInfo(array $sessionInfo): void
     {
         foreach ($sessionInfo as $name => $value) {
-            $_SESSION[$name] = $value;
+            $_SESSION[$this->prefix . $name] = $value;
         }
     }
 
@@ -43,15 +58,15 @@ class Psr7AuthContext implements AuthContext
     public function saveRememberedLoginInfo(array $rememberedLoginInfo): void
     {
         foreach ($rememberedLoginInfo as $name => $value) {
-            $this->newRememberedLoginInfo[$name] = $value;
-            $this->rememberedLoginInfoToExpire[$name] = false;
+            $this->newRememberedLoginInfo[$this->prefix . $name] = $value;
+            $this->rememberedLoginInfoToExpire[$this->prefix . $name] = false;
         }
     }
 
     public function deleteRememberedLoginInfo(): void
     {
         foreach ($this->getRememberedLoginInfo() as $name => $_) {
-            $this->rememberedLoginInfoToExpire[$name] = true;
+            $this->rememberedLoginInfoToExpire[$this->prefix . $name] = true;
             $this->newRememberedLoginInfo = [];
         }
     }
@@ -59,7 +74,9 @@ class Psr7AuthContext implements AuthContext
     public function populateContextFromPsr7Request(ServerRequestInterface $request)
     {
         foreach (Cookies::fromRequest($request)->getAll() as $cookie) {
-            $this->rememberedLoginInfo[$cookie->getName()] = $cookie->getValue();
+            if (substr($cookie->getName(), 0, strlen($this->prefix)) === $this->prefix) {
+                $this->rememberedLoginInfo[$cookie->getName()] = $cookie->getValue();
+            }
         }
     }
 
