@@ -27,5 +27,5 @@ interface AuthProvider
 
     public function isSessionValid(array $sessionInfo): bool;
 
-    public function refreshSessionFromRememberedLoginInfo(array $rememberedLoginInfo): array;
+    public function refreshSessionTokens(array $sessionInfo, array $rememberedLoginInfo): array;
 }

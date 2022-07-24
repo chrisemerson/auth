@@ -10,7 +10,6 @@ use CEmerson\Auth\AuthProvider;
 use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
-use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -136,30 +135,41 @@ class AwsCognitoAuthProvider implements AuthProvider
             );
     }
 
-    public function refreshSessionFromRememberedLoginInfo(array $rememberedLoginInfo): array
+    public function refreshSessionTokens(array $sessionInfo, array $rememberedLoginInfo): array
     {
+        $refreshToken = null;
+        $username = null;
+
         if (
-            !isset($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
-            || is_null($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
-            || !isset($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
-            || is_null($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
+            isset($sessionInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
+            && !is_null($sessionInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
+            && isset($sessionInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
+            && !is_null($sessionInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
         ) {
-            throw new Exception();
+            $refreshToken = $sessionInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME];
+            $username = $sessionInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME];
+        } elseif (
+            isset($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
+            && !is_null($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME])
+            && isset($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
+            && !is_null($rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME])
+        ) {
+            $refreshToken = $rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME];
+            $username = $rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME];
         }
 
-        $refreshToken = $rememberedLoginInfo[AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME];
-        $username = $rememberedLoginInfo[AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME];
+        if (!is_null($refreshToken) && !is_null($username)) {
+            $response = $this->attemptAuthenticationWithRefreshToken($refreshToken, $username);
 
-        $response = $this->attemptAuthenticationWithRefreshToken($refreshToken, $username);
-
-        if ($response instanceof AuthSucceededResponse) {
-            return array_merge(
-                $response->getSessionInfo(),
-                [
-                    AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME => $username,
-                    AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME => $refreshToken
-                ]
-            );
+            if ($response instanceof AuthSucceededResponse) {
+                return array_merge(
+                    $response->getSessionInfo(),
+                    [
+                        AwsCognitoAuthSucceededResponse::USERNAME_KEY_NAME => $username,
+                        AwsCognitoAuthSucceededResponse::REFRESH_TOKEN_KEY_NAME => $refreshToken
+                    ]
+                );
+            }
         }
 
         return [];

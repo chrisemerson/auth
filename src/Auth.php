@@ -30,7 +30,7 @@ final class Auth
         $this->logger = $logger;
         $this->provider = $authProvider;
 
-        $this->attemptToLoadAuthStatusFromRememberedLoginInfo();
+        $this->refreshTokens();
     }
 
     public function attemptAuthentication(AuthParameters $authParameters): bool
@@ -76,7 +76,7 @@ final class Auth
     {
         if (!$this->provider->isSessionValid($this->authContext->getSessionInfo())) {
             $this->authContext->deleteSessionInfo();
-            $this->attemptToLoadAuthStatusFromRememberedLoginInfo();
+            $this->refreshTokens();
         }
 
         return $this->provider->isSessionValid($this->authContext->getSessionInfo());
@@ -104,16 +104,18 @@ final class Auth
     {
     }
 
-    private function attemptToLoadAuthStatusFromRememberedLoginInfo()
+    private function refreshTokens()
     {
-        try {
-            $sessionInfo = $this->provider->refreshSessionFromRememberedLoginInfo(
-                $this->authContext->getRememberedLoginInfo()
-            );
+        $newSessionInfo = $this->provider->refreshSessionTokens(
+            $this->authContext->getSessionInfo(),
+            $this->authContext->getRememberedLoginInfo()
+        );
 
-            $this->authContext->saveSessionInfo($sessionInfo);
-        } catch (Exception $e) {
-            //no op
+        if (empty($newSessionInfo)) {
+            $this->authContext->deleteSessionInfo();
+            $this->authContext->deleteRememberedLoginInfo();
+        } else {
+            $this->authContext->saveSessionInfo($newSessionInfo);
         }
     }
 }
