@@ -25,8 +25,6 @@ class Psr15AuthMiddleware implements MiddlewareInterface
 
         $response = $handler->handle($request);
 
-        $this->psr7AuthContext->addContextValuesToResponse($response);
-
-        return $response;
+        return $this->psr7AuthContext->addContextValuesToResponse($response);
     }
 }
