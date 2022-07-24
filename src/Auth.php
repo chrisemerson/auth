@@ -82,7 +82,7 @@ final class Auth
         return $this->provider->isSessionValid($this->authContext->getSessionInfo());
     }
 
-    public function getCurrentUsername(): string
+    public function getCurrentUser(): AuthUser
     {
         if (!$this->isLoggedIn()) {
             throw new NoUserLoggedIn();
@@ -92,7 +92,13 @@ final class Auth
 
         $unencryptedToken = (new Parser(new JoseEncoder()))->parse($idToken);
 
-        return $unencryptedToken->claims()->get('cognito:username');
+        return new AuthUser(
+            $unencryptedToken->claims()->get('sub'),
+            [
+                'username' => $unencryptedToken->claims()->get('cognito:username'),
+                'email' => $unencryptedToken->claims()->get('email')
+            ]
+        );
     }
 
     public function hasAuthenticatedThisSession(): bool
