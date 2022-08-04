@@ -122,17 +122,17 @@ class AwsCognitoAuthProvider implements AuthProvider
     {
         return
             isset($sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME])
-            && $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME] !== null
-            && $this->tokenValidator->validateToken(
-                $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
-                'access'
-            )
-            && isset($sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME])
-            && $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME] !== null
-            && $this->tokenValidator->validateToken(
-                $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME],
-                'id'
-            );
+                && $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME] !== null
+                && $this->tokenValidator->validateToken(
+                    $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
+                    'access'
+                )
+                && isset($sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME])
+                && $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME] !== null
+                && $this->tokenValidator->validateToken(
+                    $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME],
+                    'id'
+                );
     }
 
     public function refreshSessionTokens(array $sessionInfo, array $rememberedLoginInfo): array

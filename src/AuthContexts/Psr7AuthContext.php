@@ -30,8 +30,8 @@ class Psr7AuthContext implements AuthContext
         $sessionInfo = [];
 
         foreach ($_SESSION as $name => $value) {
-            if (substr($name, 0, strlen($name)) === $this->prefix) {
-                $sessionInfo[substr($name, strlen($name))] = $value;
+            if (substr($name, 0, strlen($this->prefix)) === $this->prefix) {
+                $sessionInfo[substr($name, strlen($this->prefix))] = $value;
             }
         }
 
@@ -75,7 +75,7 @@ class Psr7AuthContext implements AuthContext
     {
         foreach (Cookies::fromRequest($request)->getAll() as $cookie) {
             if (substr($cookie->getName(), 0, strlen($this->prefix)) === $this->prefix) {
-                $this->rememberedLoginInfo[$cookie->getName()] = $cookie->getValue();
+                $this->rememberedLoginInfo[substr($cookie->getName(), strlen($this->prefix))] = $cookie->getValue();
             }
         }
     }
