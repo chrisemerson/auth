@@ -92,7 +92,8 @@ class AwsCognitoAuthProvider implements AuthProvider
         return $this->sendAuthChallengeResponse($challengeResponse);
     }
 
-    private function sendAuthChallengeResponse(AuthChallengeResponse $authenticationChallengeResponse): AuthResponse {
+    private function sendAuthChallengeResponse(AuthChallengeResponse $authenticationChallengeResponse): AuthResponse
+    {
         try {
             $challengeResponses = $authenticationChallengeResponse->getChallengeParameters();
 
