@@ -47,7 +47,11 @@ class Psr7AuthContext implements AuthContext
 
     public function deleteSessionInfo(): void
     {
-        session_destroy();
+        foreach (array_keys($_SESSION) as $name) {
+            if (substr($name, 0, strlen($this->prefix)) === $this->prefix) {
+                unset ($_SESSION[$name]);
+            }
+        }
     }
 
     public function getRememberedLoginInfo(): array

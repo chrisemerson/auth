@@ -8,6 +8,7 @@ use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Aws\Result;
 use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
 use CEmerson\Auth\AuthResponse;
+use CEmerson\Auth\AuthResponses\PasswordDoesNotConformToPolicyResponse;
 use CEmerson\Auth\AuthResponses\TokenValidationError;
 use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
 use CEmerson\Auth\Exceptions\AuthFailed;
@@ -94,6 +95,9 @@ class AwsCognitoResponseParser
             switch ($response->__type) {
                 case 'NotAuthorizedException':
                     return new AuthDetailsIncorrectResponse();
+
+                case 'InvalidPasswordException':
+                    return new PasswordDoesNotConformToPolicyResponse();
             }
         }
 

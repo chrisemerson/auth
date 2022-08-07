@@ -23,14 +23,9 @@ class NewPasswordRequiredChallenge implements AuthChallenge
 
     public static function fromJson(string $json): self
     {
-        $details = json_decode($json);
+        $details = json_decode($json, true);
 
         return new self($details[self::CHALLENGE_ID_KEY], $details[self::USERNAME_KEY]);
-    }
-
-    public function getId(): string
-    {
-        return $this->challengeId;
     }
 
     public function createChallengeResponse(string $response): AuthChallengeResponse
@@ -44,9 +39,9 @@ class NewPasswordRequiredChallenge implements AuthChallenge
 
     public function jsonSerialize()
     {
-        return json_encode([
+        return [
             self::CHALLENGE_ID_KEY => $this->challengeId,
             self::USERNAME_KEY => $this->username
-        ]);
+        ];
     }
 }

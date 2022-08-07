@@ -14,7 +14,9 @@ interface AuthProvider
     public function attemptAuthentication(AuthParameters $authParameters): AuthResponse;
 
     public function respondToAuthenticationChallenge(
-        AuthChallengeResponse $authenticationChallengeResponse
+        string $authenticationChallengeName,
+        string $authenticationChallengeDetails,
+        string $authenticationChallengeResponse
     ): AuthResponse;
 
     public function changePassword(string $username, string $oldPassword, string $newPassword): bool;

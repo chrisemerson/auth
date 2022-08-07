@@ -9,8 +9,6 @@ use JsonSerializable;
 
 interface AuthChallenge extends AuthResponse, JsonSerializable
 {
-    public function getId(): string;
-
     public static function fromJson(string $json): self;
 
     public function createChallengeResponse(string $response): AuthChallengeResponse;

@@ -18,17 +18,20 @@ class AwsCognitoAuthProvider implements AuthProvider
     private AwsCognitoConfiguration $awsCognitoConfiguration;
     private AwsCognitoResponseParser $awsCognitoResponseParser;
     private AwsCognitoJwtTokenValidator $tokenValidator;
+    private AwsCognitoAuthChallengeResponseFactory $authChallengeResponseFactory;
     private LoggerInterface $logger;
 
     public function __construct(
         AwsCognitoConfiguration $awsCognitoConfiguration,
         AwsCognitoResponseParser $awsCognitoResponseParser,
         AwsCognitoJwtTokenValidator $tokenValidator,
+        AwsCognitoAuthChallengeResponseFactory $authChallengeResponseFactory,
         LoggerInterface $logger = null
     ) {
         $this->awsCognitoConfiguration = $awsCognitoConfiguration;
         $this->awsCognitoResponseParser = $awsCognitoResponseParser;
         $this->tokenValidator = $tokenValidator;
+        $this->authChallengeResponseFactory = $authChallengeResponseFactory;
         $this->logger = $logger ?? new NullLogger();
     }
 
@@ -76,8 +79,20 @@ class AwsCognitoAuthProvider implements AuthProvider
     }
 
     public function respondToAuthenticationChallenge(
-        AuthChallengeResponse $authenticationChallengeResponse
+        string $authenticationChallengeName,
+        string $authenticationChallengeDetails,
+        string $authenticationChallengeResponse
     ): AuthResponse {
+        $challengeResponse = $this->authChallengeResponseFactory->createAuthenticationResponse(
+            $authenticationChallengeName,
+            $authenticationChallengeDetails,
+            $authenticationChallengeResponse
+        );
+
+        return $this->sendAuthChallengeResponse($challengeResponse);
+    }
+
+    private function sendAuthChallengeResponse(AuthChallengeResponse $authenticationChallengeResponse): AuthResponse {
         try {
             $challengeResponses = $authenticationChallengeResponse->getChallengeParameters();
 
@@ -89,7 +104,7 @@ class AwsCognitoAuthProvider implements AuthProvider
             }
 
             return $this->awsCognitoResponseParser->parseCognitoResponse(
-                $this->awsCognitoClient->respondToAuthChallenge([
+                $this->awsCognitoConfiguration->getAwsCognitoClient()->respondToAuthChallenge([
                     'ChallengeName' => $authenticationChallengeResponse->getChallengeName(),
                     'Session' => $authenticationChallengeResponse->getChallengeId(),
                     'ChallengeResponses' => $challengeResponses,

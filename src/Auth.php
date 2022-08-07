@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CEmerson\Auth;
 
 use CEmerson\Auth\AuthContexts\AuthContext;
+use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallenge;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Exceptions\AuthFailed;
@@ -33,7 +34,7 @@ final class Auth
         $this->refreshTokens();
     }
 
-    public function attemptAuthentication(AuthParameters $authParameters): bool
+    public function attemptAuthentication(AuthParameters $authParameters): AuthResponse
     {
         $this->logger->info("Attempting authentication with provider {provider}", [
             'provider' => basename(get_class($this->provider))
@@ -41,16 +42,10 @@ final class Auth
 
         $authResponse = $this->provider->attemptAuthentication($authParameters);
 
-        if ($authResponse instanceof AuthSucceededResponse) {
-            $this->logger->info("Authentication succeeded!");
+        $this->processAuthenticationSucceededResponse($authResponse, $authParameters->getRememberMe());
 
-            $this->authContext->saveSessionInfo($authResponse->getSessionInfo());
-
-            if ($authParameters->getRememberMe()) {
-                $this->authContext->saveRememberedLoginInfo($authResponse->getRememberedLoginInfo());
-            }
-
-            return true;
+        if ($authResponse instanceof AuthSucceededResponse || $authResponse instanceof AuthChallenge) {
+            return $authResponse;
         }
 
         $this->logger->info("Authentication failed - {response}", [
@@ -60,9 +55,21 @@ final class Auth
         throw new AuthFailed($authResponse);
     }
 
-    public function respondToChallenge(AuthChallengeResponse $challengeResponse): AuthResponse
-    {
-        return $this->provider->respondToAuthenticationChallenge($challengeResponse);
+    public function respondToChallenge(
+        string $challengeName,
+        string $challengeDetails,
+        string $challengeResponse,
+        bool $rememberMe = false
+    ): AuthResponse {
+        $response = $this->provider->respondToAuthenticationChallenge(
+            $challengeName,
+            $challengeDetails,
+            $challengeResponse
+        );
+
+        $this->processAuthenticationSucceededResponse($response, $rememberMe);
+
+        return $response;
     }
 
     public function logout()
@@ -108,6 +115,19 @@ final class Auth
 
     public function reAuthenticateCurrentUser(AuthParameters $authParameters): AuthResponse
     {
+    }
+
+    private function processAuthenticationSucceededResponse(AuthResponse $authResponse, bool $rememberMe = false)
+    {
+        if ($authResponse instanceof AuthSucceededResponse) {
+            $this->logger->info("Authentication succeeded!");
+
+            $this->authContext->saveSessionInfo($authResponse->getSessionInfo());
+
+            if ($rememberMe) {
+                $this->authContext->saveRememberedLoginInfo($authResponse->getRememberedLoginInfo());
+            }
+        }
     }
 
     private function refreshTokens()
