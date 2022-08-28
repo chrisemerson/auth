@@ -103,7 +103,9 @@ final class Auth
             $unencryptedToken->claims()->get('sub'),
             [
                 'username' => $unencryptedToken->claims()->get('cognito:username'),
-                'email' => $unencryptedToken->claims()->get('email')
+                'email' => $unencryptedToken->claims()->get('email'),
+                'name' => $unencryptedToken->claims()->get('name'),
+                'avatar' => $unencryptedToken->claims()->get('picture')
             ]
         );
     }
