@@ -26,7 +26,7 @@ $command = '';
 
 while (strtolower($command) !== "e") {
     if ($auth->isLoggedIn()) {
-        echo "Logged in as " . $auth->getCurrentUsername() . PHP_EOL;
+        echo "Logged in as " . $auth->getCurrentUser()->get('username') . PHP_EOL;
 
         $command = readline("[l]ogout, [c]hange password, [s]etup MFA, [e]xit?: ");
 

@@ -49,7 +49,7 @@ class Psr7AuthContext implements AuthContext
     {
         foreach (array_keys($_SESSION) as $name) {
             if (substr($name, 0, strlen($this->prefix)) === $this->prefix) {
-                unset ($_SESSION[$name]);
+                unset($_SESSION[$name]);
             }
         }
     }
