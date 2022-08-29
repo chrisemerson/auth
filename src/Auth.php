@@ -11,6 +11,8 @@ use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Exceptions\AuthFailed;
 use CEmerson\Auth\Exceptions\NoUserLoggedIn;
 use CEmerson\Auth\Providers\AwsCognito\AwsCognitoAuthSucceededResponse;
+use CEmerson\Auth\User\AuthUser;
+use CEmerson\Auth\User\AuthUserFactory;
 use Exception;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\Parser;
@@ -18,18 +20,21 @@ use Psr\Log\LoggerInterface;
 
 final class Auth
 {
-    private AuthContext $authContext;
-    private LoggerInterface $logger;
     private AuthProvider $provider;
+    private AuthContext $authContext;
+    private AuthUserFactory $authUserFactory;
+    private LoggerInterface $logger;
 
     public function __construct(
         AuthProvider $authProvider,
         AuthContext $authContext,
+        AuthUserFactory $authUserFactory,
         LoggerInterface $logger
     ) {
-        $this->authContext = $authContext;
-        $this->logger = $logger;
         $this->provider = $authProvider;
+        $this->authContext = $authContext;
+        $this->authUserFactory = $authUserFactory;
+        $this->logger = $logger;
 
         $this->refreshTokens();
     }
@@ -72,9 +77,30 @@ final class Auth
         return $response;
     }
 
+    public function changePassword(string $username, string $oldPassword, string $newPassword): bool
+    {
+        $this->provider->changePassword($username, $oldPassword, $newPassword);
+    }
+
+    public function forgotPassword(string $username)
+    {
+        $this->provider->forgotPassword($username);
+    }
+
+    public function resetForgottenPassword(string $username, string $confirmationCode, string $newPassword)
+    {
+        $this->provider->resetForgottenPassword($username, $confirmationCode, $newPassword);
+    }
+
+    public function registerUser(string $username, string $password)
+    {
+        $this->provider->registerUser($username, $password);
+    }
+
     public function logout()
     {
         $this->provider->logout();
+
         $this->authContext->deleteSessionInfo();
         $this->authContext->deleteRememberedLoginInfo();
     }
@@ -95,18 +121,8 @@ final class Auth
             throw new NoUserLoggedIn();
         }
 
-        $idToken = $this->authContext->getSessionInfo()[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME];
-
-        $unencryptedToken = (new Parser(new JoseEncoder()))->parse($idToken);
-
-        return new AuthUser(
-            $unencryptedToken->claims()->get('sub'),
-            [
-                'username' => $unencryptedToken->claims()->get('cognito:username'),
-                'email' => $unencryptedToken->claims()->get('email'),
-                'name' => $unencryptedToken->claims()->get('name'),
-                'avatar' => $unencryptedToken->claims()->get('picture')
-            ]
+        return $this->authUserFactory->getAuthUser(
+            $this->provider->getCurrentUser($this->authContext->getSessionInfo())
         );
     }
 
@@ -117,6 +133,7 @@ final class Auth
 
     public function reAuthenticateCurrentUser(AuthParameters $authParameters): AuthResponse
     {
+        return false;
     }
 
     private function processAuthenticationSucceededResponse(AuthResponse $authResponse, bool $rememberMe = false)

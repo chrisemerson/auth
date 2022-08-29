@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CEmerson\Auth;
+namespace CEmerson\Auth\User;
 
-class AuthUser
+class DefaultAuthUser implements AuthUser
 {
     private string $id;
     private array $userInfo;
@@ -15,7 +15,7 @@ class AuthUser
         $this->userInfo = $userInfo;
     }
 
-    public function getId(): string
+    public function getUserId(): string
     {
         return $this->id;
     }
@@ -31,6 +31,6 @@ class AuthUser
             return $this->userInfo[$field];
         }
 
-        return $default;
+        return (string) $default;
     }
 }

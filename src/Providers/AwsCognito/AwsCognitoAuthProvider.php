@@ -10,6 +10,13 @@ use CEmerson\Auth\AuthProvider;
 use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
+use CEmerson\Auth\Exceptions\AuthException;
+use CEmerson\Auth\Exceptions\InvalidPassword;
+use CEmerson\Auth\Exceptions\RateLimitExceeded;
+use CEmerson\Auth\Exceptions\VerificationCodeExpired;
+use CEmerson\Auth\User\DefaultAuthUser;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\Parser;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -117,13 +124,64 @@ class AwsCognitoAuthProvider implements AuthProvider
         }
     }
 
-    public function changePassword(string $username, string $oldPassword, string $newPassword): bool
+    public function changePassword(array $sessionInfo, string $oldPassword, string $newPassword): bool
     {
+        $response = $this->awsCognitoConfiguration->getAwsCognitoClient()->changePassword([
+            'AccessToken' => $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
+            'PreviousPassword' => $oldPassword,
+            'ProposedPassword' => $newPassword
+        ]);
+
+        print_r($response);
+        exit();
+
         return false;
     }
 
     public function forgotPassword(string $username)
     {
+        try {
+            $response = $this->awsCognitoConfiguration->getAwsCognitoClient()->adminResetUserPassword([
+                'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId(),
+                'Username' => $username
+            ]);
+
+            if ($response->get('@metadata')['statusCode'] !== 200) {
+                throw new AuthException();
+            }
+        } catch (CognitoIdentityProviderException $ex) {
+            throw $ex;
+        }
+    }
+
+    public function resetForgottenPassword(string $username, string $confirmationCode, string $newPassword)
+    {
+        try {
+            $this->awsCognitoConfiguration->getAwsCognitoClient()->confirmForgotPassword([
+                'ClientId' => $this->awsCognitoConfiguration->getClientId(),
+                'ConfirmationCode' => $confirmationCode,
+                'Password' => $newPassword,
+                'SecretHash' => $this->awsCognitoConfiguration->hash(
+                    $username
+                    . $this->awsCognitoConfiguration->getClientId()
+                ),
+                'Username' => $username
+            ]);
+        } catch (CognitoIdentityProviderException $ex) {
+            switch ($ex->getAwsErrorCode()) {
+                case 'LimitExceededException':
+                    throw new RateLimitExceeded($ex->getMessage(), $ex->getCode(), $ex);
+
+                case 'ExpiredCodeException':
+                    throw new VerificationCodeExpired($ex->getMessage(), $ex->getCode(), $ex);
+
+                case 'InvalidPasswordException':
+                    throw new InvalidPassword($ex->getMessage(), $ex->getCode(), $ex);
+
+                default:
+                    throw new AuthException();
+            }
+        }
     }
 
     public function registerUser(string $username, string $password)
@@ -149,6 +207,41 @@ class AwsCognitoAuthProvider implements AuthProvider
                     $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME],
                     'id'
                 );
+    }
+
+    public function getCurrentUser(array $sessionInfo): DefaultAuthUser
+    {
+        $unencryptedToken = (new Parser(new JoseEncoder()))->parse(
+            $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME]
+        );
+
+        $attributes = $unencryptedToken->claims()->all();
+
+        $attributesToUnset = [
+            'aud',
+            'auth_time',
+            'cognito:username',
+            'event_id',
+            'exp',
+            'iat',
+            'iss',
+            'jti',
+            'origin_jti',
+            'sub',
+            'token_use'
+        ];
+
+        $attributes['username'] = $attributes['cognito:username'];
+        $attributes['avatar'] = $attributes['picture'];
+
+        foreach ($attributesToUnset as $attributeToUnset) {
+            unset($attributes[$attributeToUnset]);
+        }
+
+        return new DefaultAuthUser(
+            $unencryptedToken->claims()->get('sub'),
+            $attributes
+        );
     }
 
     public function refreshSessionTokens(array $sessionInfo, array $rememberedLoginInfo): array

@@ -8,6 +8,7 @@ use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
 use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthProvider;
+use CEmerson\Auth\User\DefaultAuthUser;
 
 class LocalAuthProvider implements AuthProvider
 {
@@ -22,7 +23,7 @@ class LocalAuthProvider implements AuthProvider
         // TODO: Implement respondToAuthenticationChallenge() method.
     }
 
-    public function changePassword(string $username, string $oldPassword, string $newPassword): bool
+    public function changePassword(array $sessionInfo, string $oldPassword, string $newPassword): bool
     {
         // TODO: Implement changePassword() method.
     }
@@ -30,6 +31,11 @@ class LocalAuthProvider implements AuthProvider
     public function forgotPassword(string $username)
     {
         // TODO: Implement forgotPassword() method.
+    }
+
+    public function resetForgottenPassword(string $username, string $confirmationCode, string $newPassword)
+    {
+        // TODO: Implement resetForgottenPassword() method.
     }
 
     public function registerUser(string $username, string $password)
@@ -40,5 +46,20 @@ class LocalAuthProvider implements AuthProvider
     public function logout()
     {
         // TODO: Implement logout() method.
+    }
+
+    public function isSessionValid(array $sessionInfo): bool
+    {
+        // TODO: Implement isSessionValid() method.
+    }
+
+    public function getCurrentUser(array $sessionInfo): DefaultAuthUser
+    {
+        // TODO: Implement getCurrentUser() method.
+    }
+
+    public function refreshSessionTokens(array $sessionInfo, array $rememberedLoginInfo): array
+    {
+        // TODO: Implement refreshSessionTokens() method.
     }
 }
