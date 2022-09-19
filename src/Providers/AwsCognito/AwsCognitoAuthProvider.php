@@ -13,6 +13,7 @@ use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
 use CEmerson\Auth\Exceptions\AuthException;
 use CEmerson\Auth\Exceptions\InvalidPassword;
 use CEmerson\Auth\Exceptions\RateLimitExceeded;
+use CEmerson\Auth\Exceptions\UserNotFound;
 use CEmerson\Auth\Exceptions\VerificationCodeExpired;
 use CEmerson\Auth\User\DefaultAuthUser;
 use Lcobucci\JWT\Encoding\JoseEncoder;
@@ -29,12 +30,13 @@ class AwsCognitoAuthProvider implements AuthProvider
     private LoggerInterface $logger;
 
     public function __construct(
-        AwsCognitoConfiguration $awsCognitoConfiguration,
-        AwsCognitoResponseParser $awsCognitoResponseParser,
-        AwsCognitoJwtTokenValidator $tokenValidator,
+        AwsCognitoConfiguration                $awsCognitoConfiguration,
+        AwsCognitoResponseParser               $awsCognitoResponseParser,
+        AwsCognitoJwtTokenValidator            $tokenValidator,
         AwsCognitoAuthChallengeResponseFactory $authChallengeResponseFactory,
-        LoggerInterface $logger = null
-    ) {
+        LoggerInterface                        $logger = null
+    )
+    {
         $this->awsCognitoConfiguration = $awsCognitoConfiguration;
         $this->awsCognitoResponseParser = $awsCognitoResponseParser;
         $this->tokenValidator = $tokenValidator;
@@ -89,7 +91,8 @@ class AwsCognitoAuthProvider implements AuthProvider
         string $authenticationChallengeName,
         string $authenticationChallengeDetails,
         string $authenticationChallengeResponse
-    ): AuthResponse {
+    ): AuthResponse
+    {
         $challengeResponse = $this->authChallengeResponseFactory->createAuthenticationResponse(
             $authenticationChallengeName,
             $authenticationChallengeDetails,
@@ -184,8 +187,101 @@ class AwsCognitoAuthProvider implements AuthProvider
         }
     }
 
-    public function registerUser(string $username, string $password)
+    public function registerUser(string $username, ?string $password = null, array $extraUserAttributes = [])
     {
+        try {
+            $userAttributes = [];
+
+            foreach ($extraUserAttributes as $name => $value) {
+                $userAttributes[] = [
+                    'Name' => $name,
+                    'Value' => $value
+                ];
+            }
+
+            $parameters = [
+                'DesiredDeliveryMediums' => ['EMAIL'],
+                'UserAttributes' => $userAttributes,
+                'Username' => $username,
+                'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
+            ];
+
+            if (!is_null($password)) {
+                $password['TemporaryPassword'] = $password;
+            }
+
+            $this->awsCognitoConfiguration->getAwsCognitoClient()->adminCreateUser($parameters);
+
+            if (!is_null($password)) {
+                $this->awsCognitoConfiguration->getAwsCognitoClient()->adminSetUserPassword([
+                    'Password' => $password,
+                    'Permanent' => "True",
+                    'Username' => $username,
+                    'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
+                ]);
+            }
+        } catch (CognitoIdentityProviderException $ex) {
+            switch ($ex->getAwsErrorCode()) {
+                case 'InvalidPasswordException':
+                    throw new InvalidPassword($ex->getMessage(), $ex->getCode(), $ex);
+
+                default:
+                    throw new AuthException($ex->getAwsErrorCode(), 0, $ex);
+            }
+        }
+    }
+
+    public function resendTemporaryPassword(string $username)
+    {
+        try {
+            $this->awsCognitoConfiguration->getAwsCognitoClient()->adminCreateUser([
+                'DesiredDeliveryMediums' => ['EMAIL'],
+                'MessageAction' => 'RESEND',
+                'Username' => $username,
+                'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
+            ]);
+        } catch (CognitoIdentityProviderException $ex) {
+            switch ($ex->getAwsErrorCode()) {
+                default:
+                    throw new AuthException($ex->getAwsErrorCode(), 0, $ex);
+            }
+        }
+    }
+
+    public function disableUser(string $username)
+    {
+        try {
+            $this->awsCognitoConfiguration->getAwsCognitoClient()->adminDisableUser([
+                'Username' => $username,
+                'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
+            ]);
+        } catch (CognitoIdentityProviderException $ex) {
+            switch ($ex->getAwsErrorCode()) {
+                case 'UserNotFoundException':
+                    throw new UserNotFound(null, $ex->getMessage(), $ex->getCode(), $ex);
+
+                default:
+                    throw new AuthException($ex->getAwsErrorCode(), 0, $ex);
+            }
+        }
+    }
+
+    public function enableUser(string $username)
+    {
+        try {
+            $this->awsCognitoConfiguration->getAwsCognitoClient()->adminEnableUser([
+                'Username' => $username,
+                'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId()
+            ]);
+        } catch (CognitoIdentityProviderException $ex) {
+            switch ($ex->getAwsErrorCode()) {
+                case 'UserNotFoundException':
+                    throw new UserNotFound(null, $ex->getMessage(), $ex->getCode(), $ex);
+
+                default:
+                    throw new AuthException($ex->getAwsErrorCode(), 0, $ex);
+            }
+        }
     }
 
     public function logout()
@@ -196,17 +292,17 @@ class AwsCognitoAuthProvider implements AuthProvider
     {
         return
             isset($sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME])
-                && $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME] !== null
-                && $this->tokenValidator->validateToken(
-                    $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
-                    'access'
-                )
-                && isset($sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME])
-                && $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME] !== null
-                && $this->tokenValidator->validateToken(
-                    $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME],
-                    'id'
-                );
+            && $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME] !== null
+            && $this->tokenValidator->validateToken(
+                $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
+                'access'
+            )
+            && isset($sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME])
+            && $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME] !== null
+            && $this->tokenValidator->validateToken(
+                $sessionInfo[AwsCognitoAuthSucceededResponse::ID_TOKEN_KEY_NAME],
+                'id'
+            );
     }
 
     public function getCurrentUser(array $sessionInfo): DefaultAuthUser

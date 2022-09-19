@@ -26,7 +26,13 @@ interface AuthProvider
 
     public function resetForgottenPassword(string $username, string $confirmationCode, string $newPassword);
 
-    public function registerUser(string $username, string $password);
+    public function registerUser(string $username, ?string $password = null, array $extraUserAttributes = []);
+
+    public function resendTemporaryPassword(string $username);
+
+    public function disableUser(string $username);
+
+    public function enableUser(string $username);
 
     public function logout();
 

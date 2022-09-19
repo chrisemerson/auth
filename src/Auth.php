@@ -92,9 +92,24 @@ final class Auth
         $this->provider->resetForgottenPassword($username, $confirmationCode, $newPassword);
     }
 
-    public function registerUser(string $username, string $password)
+    public function registerUser(string $username, ?string $password = null, array $extraUserAttributes = [])
     {
-        $this->provider->registerUser($username, $password);
+        $this->provider->registerUser($username, $password, $extraUserAttributes);
+    }
+
+    public function resendTemporaryPassword(string $username)
+    {
+        $this->provider->resendTemporaryPassword($username);
+    }
+
+    public function disableUser(string $username)
+    {
+        $this->provider->disableUser($username);
+    }
+
+    public function enableUser(string $username)
+    {
+        $this->provider->enableUser($username);
     }
 
     public function logout()
