@@ -9,6 +9,7 @@ use Aws\Result;
 use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
 use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\PasswordDoesNotConformToPolicyResponse;
+use CEmerson\Auth\AuthResponses\RateLimitExceededResponse;
 use CEmerson\Auth\AuthResponses\TokenValidationError;
 use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
 use CEmerson\Auth\Exceptions\AuthFailed;
@@ -98,6 +99,9 @@ class AwsCognitoResponseParser
 
                 case 'InvalidPasswordException':
                     return new PasswordDoesNotConformToPolicyResponse();
+
+                case 'LimitExceededException':
+                    return new RateLimitExceededResponse();
             }
         }
 

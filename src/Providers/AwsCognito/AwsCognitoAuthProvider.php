@@ -9,8 +9,12 @@ use CEmerson\Auth\AuthParameters;
 use CEmerson\Auth\AuthProvider;
 use CEmerson\Auth\AuthResponse;
 use CEmerson\Auth\AuthResponses\AuthChallenges\AuthChallengeResponse;
+use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
 use CEmerson\Auth\AuthResponses\AuthSucceededResponse;
+use CEmerson\Auth\AuthResponses\PasswordDoesNotConformToPolicyResponse;
+use CEmerson\Auth\AuthResponses\RateLimitExceededResponse;
 use CEmerson\Auth\Exceptions\AuthException;
+use CEmerson\Auth\Exceptions\AuthFailed;
 use CEmerson\Auth\Exceptions\InvalidPassword;
 use CEmerson\Auth\Exceptions\RateLimitExceeded;
 use CEmerson\Auth\Exceptions\UserNotFound;
@@ -35,8 +39,7 @@ class AwsCognitoAuthProvider implements AuthProvider
         AwsCognitoJwtTokenValidator            $tokenValidator,
         AwsCognitoAuthChallengeResponseFactory $authChallengeResponseFactory,
         LoggerInterface                        $logger = null
-    )
-    {
+    ) {
         $this->awsCognitoConfiguration = $awsCognitoConfiguration;
         $this->awsCognitoResponseParser = $awsCognitoResponseParser;
         $this->tokenValidator = $tokenValidator;
@@ -91,8 +94,7 @@ class AwsCognitoAuthProvider implements AuthProvider
         string $authenticationChallengeName,
         string $authenticationChallengeDetails,
         string $authenticationChallengeResponse
-    ): AuthResponse
-    {
+    ): AuthResponse {
         $challengeResponse = $this->authChallengeResponseFactory->createAuthenticationResponse(
             $authenticationChallengeName,
             $authenticationChallengeDetails,
@@ -127,16 +129,33 @@ class AwsCognitoAuthProvider implements AuthProvider
         }
     }
 
-    public function changePassword(array $sessionInfo, string $oldPassword, string $newPassword): bool
+    public function changePassword(array $sessionInfo, string $currentPassword, string $newPassword): bool
     {
-        $response = $this->awsCognitoConfiguration->getAwsCognitoClient()->changePassword([
-            'AccessToken' => $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
-            'PreviousPassword' => $oldPassword,
-            'ProposedPassword' => $newPassword
-        ]);
+        try {
+            $response = $this->awsCognitoConfiguration->getAwsCognitoClient()->changePassword([
+                'AccessToken' => $sessionInfo[AwsCognitoAuthSucceededResponse::ACCESS_TOKEN_KEY_NAME],
+                'PreviousPassword' => $currentPassword,
+                'ProposedPassword' => $newPassword
+            ]);
 
-        print_r($response);
-        exit();
+            return true;
+        } catch (CognitoIdentityProviderException $ex) {
+            $response = $this->awsCognitoResponseParser->parseCognitoException($ex);
+
+            switch (get_class($response)) {
+                case AuthDetailsIncorrectResponse::class:
+                    throw new AuthFailed($response);
+
+                case RateLimitExceededResponse::class:
+                    throw new RateLimitExceeded();
+
+                case PasswordDoesNotConformToPolicyResponse::class:
+                    throw new InvalidPassword();
+
+                default:
+                    throw new AuthException("An unknown error occurred - " . get_class($response));
+            }
+        }
 
         return false;
     }
@@ -286,6 +305,30 @@ class AwsCognitoAuthProvider implements AuthProvider
 
     public function logout()
     {
+    }
+
+    public function setUserAttribute(string $username, string $attributeName, string $attributeValue): void
+    {
+        try {
+            $this->awsCognitoConfiguration->getAwsCognitoClient()->adminUpdateUserAttributes([
+                'Username' => $username,
+                'UserPoolId' => $this->awsCognitoConfiguration->getUserPoolId(),
+                'UserAttributes' => [
+                    [
+                        'Name' => $attributeName,
+                        'Value' => $attributeValue
+                    ]
+                ]
+            ]);
+        } catch (CognitoIdentityProviderException $ex) {
+            switch ($ex->getAwsErrorCode()) {
+                case 'UserNotFoundException':
+                    throw new UserNotFound(null, $ex->getMessage(), $ex->getCode(), $ex);
+
+                default:
+                    throw new AuthException($ex->getAwsErrorCode(), 0, $ex);
+            }
+        }
     }
 
     public function isSessionValid(array $sessionInfo): bool

@@ -20,7 +20,7 @@ interface AuthProvider
         string $authenticationChallengeResponse
     ): AuthResponse;
 
-    public function changePassword(array $sessionInfo, string $oldPassword, string $newPassword): bool;
+    public function changePassword(array $sessionInfo, string $currentPassword, string $newPassword): bool;
 
     public function forgotPassword(string $username);
 
@@ -35,6 +35,8 @@ interface AuthProvider
     public function enableUser(string $username);
 
     public function logout();
+
+    public function setUserAttribute(string $username, string $attributeName, string $attributeValue): void;
 
     public function isSessionValid(array $sessionInfo): bool;
 

@@ -23,7 +23,7 @@ class LocalAuthProvider implements AuthProvider
         // TODO: Implement respondToAuthenticationChallenge() method.
     }
 
-    public function changePassword(array $sessionInfo, string $oldPassword, string $newPassword): bool
+    public function changePassword(array $sessionInfo, string $currentPassword, string $newPassword): bool
     {
         // TODO: Implement changePassword() method.
     }

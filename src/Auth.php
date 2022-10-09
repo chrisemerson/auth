@@ -77,9 +77,9 @@ final class Auth
         return $response;
     }
 
-    public function changePassword(string $username, string $oldPassword, string $newPassword): bool
+    public function changePassword(string $currentPassword, string $newPassword): bool
     {
-        $this->provider->changePassword($username, $oldPassword, $newPassword);
+        return $this->provider->changePassword($this->authContext->getSessionInfo(), $currentPassword, $newPassword);
     }
 
     public function forgotPassword(string $username)
@@ -118,6 +118,11 @@ final class Auth
 
         $this->authContext->deleteSessionInfo();
         $this->authContext->deleteRememberedLoginInfo();
+    }
+
+    public function setUserAttribute(string $username, string $attributeName, string $attributeValue)
+    {
+        $this->provider->setUserAttribute($username, $attributeName, $attributeValue);
     }
 
     public function isLoggedIn(): bool
