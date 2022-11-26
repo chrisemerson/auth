@@ -19,8 +19,8 @@ use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
 use Lcobucci\JWT\Validation\Validator;
+use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
-use StellaMaris\Clock\ClockInterface;
 
 class AwsCognitoJwtTokenValidator
 {
