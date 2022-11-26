@@ -53,7 +53,7 @@ class AwsCognitoConfiguration
         return $this->jsonWebKeySet;
     }
 
-    public function hash(string $string)
+    public function hash(string $string): string
     {
         return base64_encode(
             hash_hmac(

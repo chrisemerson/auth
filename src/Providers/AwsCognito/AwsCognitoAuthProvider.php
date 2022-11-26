@@ -156,8 +156,6 @@ class AwsCognitoAuthProvider implements AuthProvider
                     throw new AuthException("An unknown error occurred - " . get_class($response));
             }
         }
-
-        return false;
     }
 
     public function forgotPassword(string $username)
@@ -226,7 +224,7 @@ class AwsCognitoAuthProvider implements AuthProvider
             ];
 
             if (!is_null($password)) {
-                $password['TemporaryPassword'] = $password;
+                $parameters['TemporaryPassword'] = $password;
             }
 
             $this->awsCognitoConfiguration->getAwsCognitoClient()->adminCreateUser($parameters);

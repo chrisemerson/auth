@@ -6,15 +6,13 @@ namespace CEmerson\Auth\Providers\AwsCognito;
 
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Aws\Result;
-use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
 use CEmerson\Auth\AuthResponse;
+use CEmerson\Auth\AuthResponses\AuthDetailsIncorrectResponse;
 use CEmerson\Auth\AuthResponses\PasswordDoesNotConformToPolicyResponse;
 use CEmerson\Auth\AuthResponses\RateLimitExceededResponse;
 use CEmerson\Auth\AuthResponses\TokenValidationError;
 use CEmerson\Auth\AuthResponses\UserNotFoundResponse;
-use CEmerson\Auth\Exceptions\AuthFailed;
 use CEmerson\Auth\Providers\AwsCognito\AuthChallenges\NewPasswordRequired\NewPasswordRequiredChallenge;
-use Exception;
 use Fig\Http\Message\StatusCodeInterface;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\Parser;

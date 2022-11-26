@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CEmerson\Auth\AuthContexts\Session;
 
-use CEmerson\Auth\Users\AuthUser;
-use CEmerson\Clock\Clock;
+use CEmerson\Auth\User\AuthUser;
+use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
@@ -26,10 +26,10 @@ final class AuthSession implements Session, LoggerAwareInterface
     /** @var bool */
     private $initialised = false;
 
-    /** @var Clock */
+    /** @var ClockInterface */
     private $clock;
 
-    public function __construct(SessionGateway $sessionGateway, Clock $clock)
+    public function __construct(SessionGateway $sessionGateway, ClockInterface $clock)
     {
         $this->sessionGateway = $sessionGateway;
         $this->clock = $clock;
@@ -58,13 +58,6 @@ final class AuthSession implements Session, LoggerAwareInterface
         $this->checkSessionStarted();
 
         return $this->sessionGateway->exists(self::SESSION_CURRENT_USER_NAME);
-    }
-
-    public function getLoggedInUsername(): string
-    {
-        $this->checkSessionStarted();
-
-        return $this->sessionGateway->read(self::SESSION_CURRENT_USER_NAME);
     }
 
     public function userHasAuthenticatedThisSession(): bool
@@ -141,6 +134,6 @@ final class AuthSession implements Session, LoggerAwareInterface
 
     private function getUnixTimestamp(): int
     {
-        return intval($this->clock->getDateTime()->format('U'));
+        return intval($this->clock->now()->format('U'));
     }
 }

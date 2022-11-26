@@ -16,9 +16,9 @@
         "fig/http-message-util": "^1.1",
         "lcobucci/jwt": "^4.1",
         "paragonie/password_lock": "^3.1",
+        "psr/clock": "^1.0",
         "psr/http-server-middleware": "^1.0",
-        "psr/log": "^1.1",
-        "stella-maris/clock": "^0.1.4"
+        "psr/log": "^1.1"
     },
     "require-dev": {
         "phpstan/phpstan": "^1.7",

@@ -7,6 +7,8 @@ namespace CEmerson\Auth\Providers\AwsCognito;
 use CEmerson\Auth\Providers\AwsCognito\Adapters\LcobucciClockAdapter;
 use CEmerson\Auth\Providers\AwsCognito\Constraints\AccessTokenForClientId;
 use CEmerson\Auth\Providers\AwsCognito\Constraints\MatchesExpectedUsage;
+use CoderCat\JWKToPEM\Exception\Base64DecodeException;
+use CoderCat\JWKToPEM\Exception\JWKConverterException;
 use CoderCat\JWKToPEM\JWKConverter;
 use DateInterval;
 use Lcobucci\JWT\Encoding\JoseEncoder;
@@ -19,8 +21,8 @@ use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
 use Lcobucci\JWT\Validation\Validator;
+use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
-use StellaMaris\Clock\ClockInterface;
 
 class AwsCognitoJwtTokenValidator
 {
@@ -46,7 +48,13 @@ class AwsCognitoJwtTokenValidator
         $pemKeys = [];
 
         foreach ($jwkSet['keys'] as $jwk) {
-            $pemKeys[$jwk['kid']] = $jwkConverter->toPEM($jwk);
+            try {
+                $pemKeys[$jwk['kid']] = $jwkConverter->toPEM($jwk);
+            } catch (Base64DecodeException | JWKConverterException $e) {
+                $this->logger->error("Error in token validation - " . $e->getMessage());
+
+                return false;
+            }
         }
 
         $keyInUse = $pemKeys[$unencryptedToken->headers()->get('kid')];

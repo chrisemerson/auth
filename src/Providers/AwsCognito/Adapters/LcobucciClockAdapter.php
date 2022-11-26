@@ -6,7 +6,7 @@ namespace CEmerson\Auth\Providers\AwsCognito\Adapters;
 
 use DateTimeImmutable;
 use Lcobucci\Clock\Clock;
-use StellaMaris\Clock\ClockInterface;
+use Psr\Clock\ClockInterface;
 
 class LcobucciClockAdapter implements Clock
 {
