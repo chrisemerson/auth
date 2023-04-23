@@ -6,5 +6,5 @@ namespace CEmerson\Auth\User;
 
 interface AuthUser
 {
-    public function getUserId(): string;
+    public function getUsername(): string;
 }

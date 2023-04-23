@@ -370,17 +370,14 @@ class AwsCognitoAuthProvider implements AuthProvider
             'token_use'
         ];
 
-        $attributes['username'] = $attributes['cognito:username'];
+        $username = $attributes['cognito:username'];
         $attributes['avatar'] = $attributes['picture'];
 
         foreach ($attributesToUnset as $attributeToUnset) {
             unset($attributes[$attributeToUnset]);
         }
 
-        return new DefaultAuthUser(
-            $unencryptedToken->claims()->get('sub'),
-            $attributes
-        );
+        return new DefaultAuthUser($username, $attributes);
     }
 
     public function refreshSessionTokens(array $sessionInfo, array $rememberedLoginInfo): array

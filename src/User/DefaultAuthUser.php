@@ -6,18 +6,18 @@ namespace CEmerson\Auth\User;
 
 class DefaultAuthUser implements AuthUser
 {
-    private string $id;
+    private string $username;
     private array $userInfo;
 
-    public function __construct(string $id, array $userInfo)
+    public function __construct(string $username, array $userInfo)
     {
-        $this->id = $id;
+        $this->username = $username;
         $this->userInfo = $userInfo;
     }
 
-    public function getUserId(): string
+    public function getUsername(): string
     {
-        return $this->id;
+        return $this->username;
     }
 
     public function has(string $field): bool
