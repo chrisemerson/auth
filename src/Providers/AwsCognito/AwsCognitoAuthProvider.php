@@ -359,7 +359,6 @@ class AwsCognitoAuthProvider implements AuthProvider
         $attributesToUnset = [
             'aud',
             'auth_time',
-            'cognito:username',
             'event_id',
             'exp',
             'iat',
