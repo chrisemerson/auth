@@ -366,7 +366,6 @@ class AwsCognitoAuthProvider implements AuthProvider
             'iss',
             'jti',
             'origin_jti',
-            'sub',
             'token_use'
         ];
 
